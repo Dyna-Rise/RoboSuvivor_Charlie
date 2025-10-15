@@ -20,7 +20,6 @@ public class BossController : MonoBehaviour
     public float attackInterval = 5f;               // 攻撃のクールダウン
     public GameObject bulletPrefab;                 // 飛ばす弾のプレハブ
     public float bulletSpeed = 100.0f;              // 弾の速度
-    public bool barrierDeployment;                  // バリアを展開しているか(false=消去中/true=展開中)
     public float moveSpeed = 0.5f;                  // 移動スピード(タックルの移動速度)
     public GameObject gate;                         // 弾を生成する位置
     public GameObject barrierPrefab;                // パリアープレハブ
@@ -45,12 +44,6 @@ public class BossController : MonoBehaviour
         rbody = GetComponent<Rigidbody>();    // Rigidbodyを得る
                                               //        animator = GetComponent<Animator>();    //Animatorを得る
         player = GameObject.FindGameObjectWithTag("Player"); //プレイヤー情報を得る
-                                                             // バリア子オブジェクトを取得する
-                                                             //barrierPrefab = transform.Find("Barrier").gameObject;
-
-        // パリアを非表示にする
-        //        barrierPrefab.SetActive(false);
-        //        animator.SetBool("Active", true);
 
     }
 
@@ -71,13 +64,14 @@ public class BossController : MonoBehaviour
             //moveDirection.z = 0;
             // 復活までの時間をカウント
             recoverTime -= Time.deltaTime;
-
             // 点滅処理
             Blinking();
         }
         else
         {
-            // 自身の位置をプレイヤーに向ける
+            isDamage = false;     //ダメージフラグ
+
+            // 自身の向きをプレイヤーに向ける
             transform.LookAt(player.transform);
 
             // プレイヤーと自身の位置の差
@@ -93,7 +87,7 @@ public class BossController : MonoBehaviour
         //プレイヤーがいない時は何もしない
         if (player == null) return;
 
-        //<<< 動作タイマー処理 >>>
+        //<<< クールダウンタイマー処理 >>>
         // 攻撃処理中は何もしない
         // タイマーもクリア
         if (isAttacking)
@@ -104,7 +98,7 @@ public class BossController : MonoBehaviour
         else
         {
             // タイマーが攻撃のクールダウンカウントアップするまで何もしない
-//            Debug.Log($"AttackingInterval={attackInterval} Timer={timer}");
+            //            Debug.Log($"AttackingInterval={attackInterval} Timer={timer}");
             timer += Time.deltaTime;
             if (timer <= attackInterval)
             {
@@ -142,8 +136,8 @@ public class BossController : MonoBehaviour
 
             // ランダムで遠距離処理選択用の0,1の2択の値を作成する
             int rnd = Random.Range(0, 2); // ※ 0～1の範囲でランダムな整数値が返る
-//            rnd = 1;    // debag
-            rnd = 0;
+            //rnd = 0;    // デバッグ
+
             // 攻撃中では無い？
             if (!isAttacking)
             {
@@ -181,52 +175,15 @@ public class BossController : MonoBehaviour
         Debug.Log("Barrier()");
 
         // バリア発生までのウエイト(プレイヤーが斬撃するための隙を作る)
-        yield return new WaitForSeconds(3.0f);
+        yield return new WaitForSeconds(1.0f);
 
-        // バリア発生中時間カウンタをクリアする
-        //barrierEffecticeCount = 0.0f;       // バリアー発生時間カウンタ
-
-        // バリアプレアブを生成する
-        Vector3 barrierPos = transform.position;
-        barrierPos.y = 2.0f;
-//        GameObject barrier = Instantiate(barrierPrefab, transform.position, Quaternion.identity); // 新しい回転を適用
-        GameObject barrier = Instantiate(barrierPrefab, barrierPos, Quaternion.identity); // 新しい回転を適用
-        Debug.Log($"transform.position={transform.position}");
-        Debug.Log("Barrier() Instantiate");
-        Vector3 barrierSize = barrier.transform.localScale;
-//        barrier.transform.localScale = new Vector3(barrierSize.x / 10.0f, barrierSize.y / 10.0f, barrierSize.z / 10.0f);
-
-        Debug.Log($"Barrier() barrierSize={barrierSize}");
         //<<< バリアを表示する >>>
-        // バリアが生成されて範囲が少しずつ広がるイメージ
-        barrier.SetActive(true);
-        //barrier.transform.localScale = Vector3.Lerp(barrier.transform.localScale, barrierSize, Time.deltaTime);
+        // バリアプレアブを生成する
+        //        GameObject barrier = Instantiate(barrierPrefab, transform.position, Quaternion.identity); // 新しい回転を適用
+        //        GameObject barrier = Instantiate(barrierPrefab, barrierPos, Quaternion.identity); // 新しい回転を適用
+        GameObject barrier = Instantiate(barrierPrefab, transform.position, Quaternion.identity); // 新しい回転を適用
 
-        //while (barrier.transform.localScale.x < barrierSize.x)
-        //{
-        //    //            barrier.transform.localScale = Vector3.Lerp(barrier.transform.localScale, barrierSize, Time.deltaTime * 2.0f);  // 一直線上で補間
-        //    barrier.transform.localScale = Vector3.Slerp(barrier.transform.localScale, barrierSize, Time.deltaTime * 2.0f); // 円弧を描くように補間
-        //    // 一定時間ウエイト
-        //    yield return null;    // 1フレーム処理を待ちます。
-        //}
-
-        //<<< バリア発生時間が経過するまでループ >>>
-        //while (barrierEffecticeCount < barrierEffectiveTime)
-        //{
-        //    // 他の処理でバリアが解除されたらバリア処理を終了する
-        //    if (!barrierDeployment) break;
-
-        //    // 一定時間ウエイト
-        //    yield return null;    // 1フレーム処理を待ちます。
-
-        //    // バリア展開中カウンタを加算する
-        //    barrierEffecticeCount += Time.deltaTime;	    // バリアー発生時間カウンタ
-        //}
-
-        // パリアを廃棄する
-        //        Destroy(barrier);
-
-        // バリアが消滅するのを待つ
+        // バリアは自身のスクリプトで自身を削除するので消滅するのを待つ
         while (barrier != null)
         {
             yield return null;
@@ -234,6 +191,8 @@ public class BossController : MonoBehaviour
 
         // 攻撃中フラグをクリアする
         isAttacking = false;                    // 攻撃中かどうか
+        Debug.Log("Barrier OFF");
+
     }
 
     /// <summary>
@@ -244,19 +203,11 @@ public class BossController : MonoBehaviour
     {
         Debug.Log("Tackle()");
 
-
-        float maxSpeed = 10f;       // 最大速度
-        float stopDistance = 10.5f;  // 接近停止距離
-        float currentSpeed = 0f;
-
-        Vector3 barrierSize = barrierPrefab.transform.localScale;
-        //Debug.Log($"Tackle barrierSize={barrierSize}");
-
         // プレイヤーの位置を取得する
         Vector3 playerPosition = player.transform.position;
 
-        //        while (Vector3.Distance(transform.position, playerPosition) > stopDistance)
-        while (Vector3.Distance(transform.position, playerPosition) >  closeRange)             // プレイヤーとの距離が近いと判断する距離(近接攻撃をする距離)
+        // プレイヤーに向かって設定されている近接位置まで移動する
+        while (Vector3.Distance(transform.position, playerPosition) > closeRange)             // プレイヤーとの距離が近いと判断する距離(近接攻撃をする距離)
         {
             transform.position = Vector3.Lerp(transform.position, playerPosition, Time.deltaTime);
             // 次のフレームまで待機
@@ -264,22 +215,7 @@ public class BossController : MonoBehaviour
         }
         // 攻撃中フラグをクリアする
         isAttacking = false;           // 攻撃中かどうか
-        Debug.Log("isAttacking = fales");
-        //// 対象への方向
-        //Vector3 direction = (playerPosition - transform.position).normalized;
-
-        //    // 加速
-        //    currentSpeed += moveSpeed * Time.deltaTime;
-        //    currentSpeed = Mathf.Min(currentSpeed, maxSpeed);
-
-        //    // 移動
-        //    transform.position += direction * currentSpeed * Time.deltaTime;
-
-        //    //            barrier.transform.localScale = Vector3.Lerp(barrier.transform.localScale, barrierSize, Time.deltaTime * 2.0f);  // 一直線上で補間
-        //    //barrier.transform.position = Vector3.Slerp(barrier.transform.position, playerPosition, Time.deltaTime * currentSpeed); // 円弧を描くように補間
-
-        //    // 次のフレームまで待機
-        //    yield return null;
+        Debug.Log("Tackle() isAttacking = fales");
     }
 
 
@@ -303,183 +239,189 @@ public class BossController : MonoBehaviour
     /// </summary>
     /// <returns></returns>
     IEnumerator Shot()
-{
+    {
         //Debug.Log("Shot()");
-    //        Transform gate = transform.Find("Gate");
-    int burstCount = 3; // バーストショット回数
-    int shotCount = 0;
+        //        Transform gate = transform.Find("Gate");
+        int burstCount = 3; // バーストショット回数
+        int shotCount = 0;
 
-    Vector3 currentPosityon = transform.position;
+        // 自身の位置をプレイヤーに向ける
+        transform.LookAt(player.transform);
 
-    // バーストショット処理
-    while (burstCount > shotCount)
-    {
-        //            transform.position = currentPosityon;
+        // プレイヤーが弾よけ出来るように1秒待つ
+        yield return new WaitForSeconds(1.0f);
 
-        // ゲートを攻撃対象に向ける
-        gate.transform.LookAt(player.transform);
+        // バーストショット処理
+        while (burstCount > shotCount)
+        {
+            // ゲートを攻撃対象に向ける
+            gate.transform.LookAt(player.transform);
 
-        // 射出方向の回転に加えて、Bulletが横向きになるような回転を適用
-        // gate.transform.rotationは、Gateが向いている方向にBulletのZ軸を合わせる
-        // Quaternion.Euler(90, 0, 0)は、X軸を90度回転させることで、シリンダーのY軸（長い方）をZ軸方向（前）に倒す
-        Quaternion bulletRotation = gate.transform.rotation * Quaternion.Euler(90, 0, 0);
-        GameObject bullet = Instantiate(bulletPrefab, gate.transform.position, bulletRotation); // 新しい回転を適用
+            // 射出方向の回転に加えて、Bulletが横向きになるような回転を適用
+            // gate.transform.rotationは、Gateが向いている方向にBulletのZ軸を合わせる
+            // Quaternion.Euler(90, 0, 0)は、X軸を90度回転させることで、シリンダーのY軸（長い方）をZ軸方向（前）に倒す
+            Quaternion bulletRotation = gate.transform.rotation * Quaternion.Euler(90, 0, 0);
+            GameObject bullet = Instantiate(bulletPrefab, gate.transform.position, bulletRotation); // 新しい回転を適用
 
-        // 弾のRigidbodyを読みだす
-        Rigidbody bulletRbody = bullet.GetComponent<Rigidbody>();
+            // 弾のRigidbodyを読みだす
+            Rigidbody bulletRbody = bullet.GetComponent<Rigidbody>();
 
-        // 弾を打ち出す
-        shotCount++;
-        bulletRbody.AddForce(gate.transform.forward * 100.0f, ForceMode.Impulse);
+            // 弾を打ち出す
+            shotCount++;
+            bulletRbody.AddForce(gate.transform.forward * bulletSpeed, ForceMode.Impulse);
 
-        rbody.AddRelativeForce(transform.forward * -0.5f, ForceMode.Impulse);
+            // とりあえず弾を消去する
+            StartCoroutine(DestroyBullet(bullet));
 
-        // とりあえず弾を消去する
-        StartCoroutine(DestroyBullet(bullet));
+            // バーストショットで次弾を打ち出す迄のウエイト
+            yield return new WaitForSeconds(0.2f);
+        }
 
-        // バーストショットで次弾を打ち出す迄のウエイト
-        yield return new WaitForSeconds(0.2f);
+        // 攻撃中フラグをクリアする
+        isAttacking = false;           // 攻撃中かどうか
     }
 
-    // 次弾発射可能になるまでのインターバル
-    yield return new WaitForSeconds(3f);
-
-    // 攻撃中フラグをクリアする
-    isAttacking = false;           // 攻撃中かどうか
-}
-
-/// <summary>
-/// とりあえず弾を消去する
-/// </summary>
-/// <param name="bullet"></param>
-/// <returns></returns>
-IEnumerator DestroyBullet(GameObject bullet)
-{
-    // とりあえず0.5秒後に弾を消去する
-    yield return new WaitForSeconds(0.5f);
-    Destroy(bullet);
-}
-
-/// <summary>
-/// スタン（気絶状態）かどうか
-/// </summary>
-/// <returns></returns>
-bool IsStun()
-{
-    // recoverTimeが稼働中かHPが0になった場合はsturnフラグがON
-    bool stun = recoverTime > 0.0f || bossHP <= 0;
-
-    // ※StunフラグがOFFの場合はボディを確実に表示
-    if (!stun) body.SetActive(true);
-
-    // Stunフラグをリターン
-    return stun;
-}
-
-/// <summary>
-/// 点滅処理 
-/// </summary>
-void Blinking()
-{
-    // 点滅演出
-    // Sinメソッドの角度情報にゲーム開始からの経過時間を与える
-    float val = Mathf.Sin(Time.time * 50);
-
-    if (val > 0)
+    /// <summary>
+    /// とりあえず弾を消去する
+    /// </summary>
+    /// <param name="bullet"></param>
+    /// <returns></returns>
+    IEnumerator DestroyBullet(GameObject bullet)
     {
-        body.SetActive(true);
-        //// 描画機能を有効
-        //gameObject.GetComponent<SpriteRenderer>().enabled = true;
-    }
-    else
-    {
-        body.SetActive(false);
-        //// 描画機能を無効
-        //gameObject.GetComponent<SpriteRenderer>().enabled = false;
-    }
-}
-
-/// <summary>
-/// プレイヤーの弾又はソードとの接触
-/// ブリンク表示してHPを減少させる
-/// </summary>
-/// <param name="collision"></param>
-private void OnTriggerEnter(Collider collision)
-{
-    bool playerSword = false;   // ソードに接触フラグ
-
-    // 接触したのがプレイヤーの弾だったら
-    if (collision.gameObject.CompareTag("PlayerBullet"))
-    {
-        playerSword = false;
-    }
-    else if (collision.gameObject.CompareTag("PlayerSword"))
-    {
-        playerSword = true;
-    }
-    else
-    {
-        return;
+        // とりあえず0.5秒後に弾を消去する
+        yield return new WaitForSeconds(3.5f);
+        Destroy(bullet);
     }
 
-    // 既にプレイヤーの弾と接触中ならば何もしない
-    if (IsStun()) return;
+    /// <summary>
+    /// スタン（気絶状態）かどうか
+    /// </summary>
+    /// <returns></returns>
+    bool IsStun()
+    {
+        // recoverTimeが稼働中かHPが0になった場合はsturnフラグがON
+        bool stun = recoverTime > 0.0f || bossHP <= 0;
 
-    if (playerSword)
-    {
-        // HPの減算(3倍)更新
-        bossHP -= 3;
-    }
-    else
-    {
-        // HPの減算更新
-        bossHP--;
-    }
+        // ※StunフラグがOFFの場合はボディを確実に表示
+        if (!stun) body.SetActive(true);
 
-
-    // HPの残量による処理
-    if (bossHP > 0)
-    {
-        //recoverTimeの時間を設定
-        recoverTime = StunDuration;
-    }
-    else
-    {
-        // ゲームオーバー処理
-        GameOver();
-        //                if (GameManager.gameState == GameState.playing) StartCoroutine(StartEnding());
-        // とりあえずゲーム終了
-        Application.Quit();//ゲームプレイ終了
+        // Stunフラグをリターン
+        return stun;
     }
 
-}
+    /// <summary>
+    /// 点滅処理 
+    /// </summary>
+    void Blinking()
+    {
+        // 点滅演出
+        // Sinメソッドの角度情報にゲーム開始からの経過時間を与える
+        float val = Mathf.Sin(Time.time * 50);
+
+        if (val > 0)
+        {
+            body.SetActive(true);
+            //// 描画機能を有効
+            //gameObject.GetComponent<SpriteRenderer>().enabled = true;
+        }
+        else
+        {
+            body.SetActive(false);
+            //// 描画機能を無効
+            //gameObject.GetComponent<SpriteRenderer>().enabled = false;
+        }
+    }
+
+    /// <summary>
+    /// プレイヤーの弾又はソードとの接触
+    /// ブリンク表示してHPを減少させる
+    /// </summary>
+    /// <param name="collision"></param>
+    private void OnTriggerEnter(Collider collision)
+    {
+        bool playerSword = false;   // ソードに接触フラグ
+
+        //playingモードでないと何もしない
+        if (GameManager.gameState != GameState.playing) return;
 
 
-/// <summary>
-/// ゲームオーバー処理
-/// </summary>
-void GameOver()
-{
-    Debug.Log("Game over");
-    GameManager.gameState = GameState.gameover;
+        Debug.Log("OnTriggerEnter()");
+        // 接触したのがプレイヤーの弾だったら
+        if (collision.gameObject.CompareTag("PlayerBullet"))
+        {
+            playerSword = false;
+        }
+        else if (collision.gameObject.CompareTag("PlayerSword"))
+        {
+            playerSword = true;
+        }
+        else
+        {
+            return;
+        }
 
-    //recoverTimeの時間をクリア
-    recoverTime = 0.0f;
+        // 既にプレイヤーの弾と接触中ならば何もしない
+        if (IsStun()) return;
 
-}
+        if (playerSword)  // ソード
+        {
+            // HPの減算(3倍)更新
+            bossHP -= 3;
+            Debug.Log($"sword={bossHP}");
+        }
+        else  // 弾
+        {
+            // HPの減算更新
+            bossHP--;
+            Debug.Log($"bllet={bossHP}");
+        }
 
-/// <summary>
-/// エンディングへの切り替え
-/// </summary>
-/// <returns></returns>
-IEnumerator StartEnding()
-{
-    //ゲームエンド
-    //        animator.SetTrigger("Dead");
-    rbody.linearVelocity = Vector2.zero;
-    //        GameManager.gameState = GameState.ending;
-    yield return new WaitForSeconds(10);
-    SceneManager.LoadScene("Ending");
-}
+        Debug.Log($"bossHp={bossHP}");
+        // HPの残量による処理
+        if (bossHP > 0)
+        {
+            //recoverTimeの時間を設定
+            recoverTime = StunDuration;
+            isDamage = true;     //ダメージフラグ
+        }
+        else
+        {
+            // ゲームクリア処理
+            GameClear();
+            //                if (GameManager.gameState == GameState.playing) StartCoroutine(StartEnding());
+            // とりあえずゲーム終了
+            Application.Quit();//ゲームプレイ終了
+        }
+
+    }
+
+
+    /// <summary>
+    /// ゲームクリア処理
+    /// </summary>
+    void GameClear()
+    {
+        Debug.Log("Game clear");
+        GameManager.gameState = GameState.gameclear;
+
+        //recoverTimeの時間をクリア
+        recoverTime = 0.0f;
+        StartCoroutine(StartEnding());
+
+    }
+
+    /// <summary>
+    /// エンディングへの切り替え
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator StartEnding()
+    {
+        //ゲームエンド
+        //        animator.SetTrigger("Dead");
+        rbody.linearVelocity = Vector2.zero;
+        //        GameManager.gameState = GameState.ending;
+        yield return new WaitForSeconds(10);
+        SceneManager.LoadScene("Ending");
+    }
 
 }

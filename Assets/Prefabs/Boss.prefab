@@ -76,6 +76,7 @@ GameObject:
   - component: {fileID: 3981273477448672085}
   - component: {fileID: 4081123908964859673}
   - component: {fileID: 2804840249253866096}
+  - component: {fileID: 3119893217438262874}
   m_Layer: 9
   m_Name: Boss
   m_TagString: Enemy
@@ -268,6 +269,29 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &3119893217438262874
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8653687361996103961}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa89fe520d34dc041ae83095d8210641, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bossHP: 30
+  body: {fileID: 5984871005895375351}
+  closeRange: 3
+  barrierDeploymentDistance: 5
+  attackInterval: 5
+  bulletPrefab: {fileID: 6661650154168110023, guid: d6af67595b24ddb4dbea8a0f393d64c8, type: 3}
+  bulletSpeed: 100
+  barrierDeployment: 0
+  moveSpeed: 0.5
+  gate: {fileID: 479167254591033205}
+  barrierPrefab: {fileID: 2537263942911418905, guid: d74626caef558da4fb56793955c4637a, type: 3}
 --- !u!1001 &4272159088411163765
 PrefabInstance:
   m_ObjectHideFlags: 0
