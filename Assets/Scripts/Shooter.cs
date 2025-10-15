@@ -33,6 +33,8 @@ public class Shooter : MonoBehaviour
 
         //カメラ情報の取得
         cam = Camera.main;
+
+        audio = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -67,24 +69,25 @@ public class Shooter : MonoBehaviour
             return;
 
         //プレイヤーの位置にBulletを作成、カメラの角度に生成
-        GameObject obj = Instantiate(bulletPrefab, gate.transform.position, cam.transform.rotation * Quaternion.Euler(90, 0, 0));
+        GameObject obj = Instantiate(bulletPrefab, gate.transform.position, gate.transform.rotation * Quaternion.Euler(90, 0, 0));
 
 
         //生成したBulletのRigidbodyを取得
         Rigidbody rbody = obj.GetComponent<Rigidbody>();
 
         //カメラの角度を考慮した方向を生成
-        //Vector3 v = new Vector3(
-        //       cam.transform.forward.x * shootPower,
-        //       cam.transform.forward.y + 0,
-        //       cam.transform.forward.z * shootPower
-        // );
-        // カメラの向きに飛ばすように変更
-        Vector3 v = cam.transform.forward * shootPower;
+        Vector3 v = new Vector3(
+               cam.transform.forward.x * shootPower,
+               cam.transform.forward.y,
+               cam.transform.forward.z * shootPower
+         );
+        //  カメラの向きに飛ばすように変更
+        //Vector3 v = cam.transform.forward * shootPower;
 
         //生成した球のAddForceの力でシュート
         rbody.AddForce(v, ForceMode.Impulse);
         isAttack = true;
+        SEPlay(SEType.Shot);
 
         ConsumeBullet();
 
@@ -117,6 +120,12 @@ public class Shooter : MonoBehaviour
     void ResetAttack()
     {
         isAttack = false;
+    }
+
+    public void SEPlay(SEType type)
+    {
+        audio.PlayOneShot(se_shot);
+        
     }
 
 }
