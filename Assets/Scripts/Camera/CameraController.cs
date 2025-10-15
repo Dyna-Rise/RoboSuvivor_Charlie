@@ -19,9 +19,12 @@ public class CaneraRotation : MonoBehaviour
     public float zoomSpeed = 5f; //カメラのズームスピード
     public float minZoom = 2f; //ズーム限界
     public float maxZoom = 10f; //ズームアウト限界
-    float currentZoom = 5f; //ズーム初期値
+    float currentZoom = 3f; //ズーム初期値
 
     public float currentZoomHeight = 3.0f; // プレイヤーの頭の少し上
+    Vector3 diff; //ターゲット距離の差
+    public Vector3 defaultPos = new Vector3(0, 3.5f, -2);
+    public Vector3 defaultRotate = new Vector3(20, 0, 0);
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -29,9 +32,8 @@ public class CaneraRotation : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked; //画面中心にカーソルをロック
         Cursor.visible = false; //カーソルを非表示
-        
-        
         player = GameObject.FindGameObjectWithTag("Player");
+        diff = player.transform.position - transform.position;
         
     }
 
@@ -39,42 +41,49 @@ public class CaneraRotation : MonoBehaviour
     void Update()
     {
         //プレイ状態でなければ動かせないようにしておく
-        if (GameManager.gameState != GameState.playing) return;
+        // new Vector3(0, currentZoomHeight, -currentZoom)
+        //プレイヤーが回転してもカメラが後ろに来るようにoffsetを定義
+        // Y軸方向に currentZoomHeight → カメラを上に持ち上げる
+        // Z軸方向に -currentZoom → プレイヤーの後ろに下がる
 
-        //マウスの動き
+        // Quaternion.Euler(verticalRotation, horizontalRotation, 0f)
+        //カメラ回転を offset に反映
+        //verticalRotationで上下方向、horizontalRotationで左右方向にoffsetが回転
+        Vector3 offset = Quaternion.Euler(verticalRotation, horizontalRotation, 0f) * new Vector3(0, currentZoomHeight, -currentZoom);
+        //カメラの位置をoffset分ずらす
+        transform.position = player.transform.position + offset;
+    }
+    
+    void LateUpdate()
+    {
+        if (GameManager.gameState != GameState.playing || player == null)
+            return;
+         
+         //マウスの動き
         float mouseX = Input.GetAxis("Mouse X") * sensitivity; //横のマウスの動きの量に速さをかけて代入
         float mouseY = Input.GetAxis("Mouse Y") * sensitivity; //上下のマウスの動きの量に速さをかけて代入
         float scroll = Input.GetAxis("Mouse ScrollWheel"); //マウススクロールのホイール量を取得して代入
 
-        horizontalRotation += mouseX; //横のマウスの動きの量を加算
+         horizontalRotation += mouseX; //横のマウスの動きの量を加算
         // horizontalRotation = Mathf.Clamp(horizontalRotation, minHorizontalAngle, maxHorizontalAngle); //横方向のカメラの動きの制限、最小、最大
 
-        verticalRotation += mouseY; //縦のマウスの動きの量を加算
+        verticalRotation -= mouseY; //縦のマウスの動きの量を減算
         verticalRotation = Mathf.Clamp(verticalRotation, minVerticalRotationAngle, maxVerticalRotationAngle); //縦方向のカメラの動きの制限、最小、最大
 
-        //カメラの回転を生成、カメラ自身の回転
+         //カメラの回転を生成、カメラ自身の回転
         transform.localRotation = Quaternion.Euler(verticalRotation, horizontalRotation, 0f);
 
         //プレイヤーの回転を生成
         player.transform.Rotate(Vector3.up * mouseX);
 
-        //マウスホイール上下させるとズームインアウトする処理
+
+         //マウスホイール上下させるとズームインアウトする処理
         currentZoom -= scroll * zoomSpeed;
 
         //ズームアウトとズームインの限界値を代入
         currentZoom = Mathf.Clamp(currentZoom, minZoom, maxZoom);
 
-        // new Vector3(0, currentZoomHeight, -currentZoom)
-        //プレイヤーが回転してもカメラが後ろに来るようにoffsetを定義
-        // Y軸方向に currentZoomHeight → カメラを上に持ち上げる
-        // Z軸方向に -currentZoom → プレイヤーの後ろに下がる
+        Vector3  targetCameraPosition = player.transform.position -diff * player.transform.rotation;
         
-        // Quaternion.Euler(verticalRotation, horizontalRotation, 0f)
-        //カメラ回転を offset に反映
-        //verticalRotationで上下方向、horizontalRotationで左右方向にoffsetが回転
-        Vector3 offset = Quaternion.Euler(verticalRotation, horizontalRotation, 0f) * new Vector3(0, currentZoomHeight, -currentZoom);
-
-        //カメラの位置をoffset分ずらす
-        transform.position = player.transform.position + offset;
     }
 }
