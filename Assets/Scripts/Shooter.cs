@@ -68,7 +68,7 @@ public class Shooter : MonoBehaviour
         if (player == null || GameManager.shotRemainingNum <= 0 || isAttack)
             return;
 
-        //プレイヤーの位置にBulletを作成、カメラの角度に生成
+        //プレイヤーの位置にBulletを作成、gateの角度に生成
         GameObject obj = Instantiate(bulletPrefab, gate.transform.position, gate.transform.rotation * Quaternion.Euler(90, 0, 0));
 
 
@@ -76,16 +76,21 @@ public class Shooter : MonoBehaviour
         Rigidbody rbody = obj.GetComponent<Rigidbody>();
 
         //カメラの角度を考慮した方向を生成
-        Vector3 v = new Vector3(
-               cam.transform.forward.x * shootPower,
-               cam.transform.forward.y,
-               cam.transform.forward.z * shootPower
-         );
+        // Vector3 v = new Vector3(
+        //        cam.transform.forward.x * shootPower,
+        //        cam.transform.forward.y,
+        //        cam.transform.forward.z * shootPower
+        //  );
+
+
         //  カメラの向きに飛ばすように変更
-        //Vector3 v = cam.transform.forward * shootPower;
+        // Vector3 v = (cam.transform.forward + Vector3.up * 0.3f).normalized * shootPower; //別の書き方
+        Vector3 v = cam.transform.forward * shootPower;
 
         //生成した球のAddForceの力でシュート
-        rbody.AddForce(v, ForceMode.Impulse);
+        // rbody.AddForce(v + new Vector3(0, 20, 0), ForceMode.Impulse);
+        rbody.AddForce(v + new Vector3(0,20,0), ForceMode.Impulse);
+        
         isAttack = true;
         SEPlay(SEType.Shot);
 
