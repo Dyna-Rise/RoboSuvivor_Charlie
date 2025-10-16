@@ -310,18 +310,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60164141bb0aa4f48836b69e9f37449d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  detectionRange: 80
-  attackRange: 30
-  stopRange: 5
+  detectionRange: 30
+  attackRange: 20
+  stopRange: 10
   shootSpeed: 100
-  enemyHP: 3
-  enemySpeed: 5
-  body: {fileID: 0}
+  enemyHP: 5
+  enemySpeed: 3
+  body: {fileID: 6587843039138566610}
   deletePosY: -50
   bulletPrefab: {fileID: 6661650154168110023, guid: d6af67595b24ddb4dbea8a0f393d64c8, type: 3}
-  gate: {fileID: 0}
+  gate: {fileID: 7844889968726266431}
   bulletSpeed: 20
   fireInterval: 2
+  flamePrefab: {fileID: 11221310824418764, guid: aa39998c8818a584ba24965d950e51b1, type: 3}
+  se_shot: {fileID: 8300000, guid: e9d67448e6d9ef749a7b4bdf5711c64b, type: 3}
+  se_damage: {fileID: 8300000, guid: 0d30ac30267e842419537598daf5f23d, type: 3}
+  se_exprosion: {fileID: 8300000, guid: 0bdbb689c62e18943b959eb8102051b0, type: 3}
 --- !u!1 &7844889968726266431
 GameObject:
   m_ObjectHideFlags: 0

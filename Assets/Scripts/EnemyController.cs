@@ -6,117 +6,163 @@ using UnityEngine.EventSystems;
 
 public class EnemyController : MonoBehaviour
 {
-    GameObject player;      // ƒvƒŒƒCƒ„[‚ğInspector‚©‚çİ’è
-    NavMeshAgent navMeshAgent;     // NavMeshAgentƒRƒ“ƒ|[ƒlƒ“ƒg
+    GameObject player;      // ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‚’Inspectorã‹ã‚‰è¨­å®š
+    NavMeshAgent navMeshAgent;     // NavMeshAgentã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ
 
-    public float detectionRange = 80f; // ƒvƒŒƒCƒ„[‚ğŒŸ’m‚·‚é‹——£
-    public float attackRange = 30f; // UŒ‚‚ğŠJn‚·‚é‹——£
-    public float stopRange = 5f; //Ú‹ßŒÀŠE‹——£
+    //private Animator animator; // Animatorã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ
 
-    public float shootSpeed = 100f; //”­Ë‘¬“x
+    public float detectionRange = 80f; // ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‚’æ¤œçŸ¥ã™ã‚‹è·é›¢
+    public float attackRange = 30f; // æ”»æ’ƒã‚’é–‹å§‹ã™ã‚‹è·é›¢
+    public float stopRange = 5f; //æ¥è¿‘é™ç•Œè·é›¢
 
-    public int enemyHP = 5; //“G‚ÌHP
-    public float enemySpeed = 5.0f; //“G‚ÌƒXƒs[ƒh
+    public float shootSpeed = 100f; //ç™ºå°„é€Ÿåº¦
 
-    bool isDamage; //ƒ_ƒ[ƒW’†ƒtƒ‰ƒO
-    public GameObject body; //“_–Å‚³‚ê‚ébody
+    public int enemyHP = 5; //æ•µã®HP
+    public float enemySpeed = 5.0f; //æ•µã®ã‚¹ãƒ”ãƒ¼ãƒ‰
 
-    bool isAttack; //UŒ‚’†ƒtƒ‰ƒO
+    bool isDamage; //ãƒ€ãƒ¡ãƒ¼ã‚¸ä¸­ãƒ•ãƒ©ã‚°
+    public GameObject body; //ç‚¹æ»…ã•ã‚Œã‚‹body
 
-    bool lockOn = true; //ƒ^[ƒQƒbƒg‚ğŒü‚­‚×‚«
+    bool isAttack; //æ”»æ’ƒä¸­ãƒ•ãƒ©ã‚°
 
-    float timer; //ŠÔŒo‰ß
+    bool lockOn = true; //ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã‚’å‘ãã¹ã
 
-    GameObject gameMgr; //ƒQ[ƒ€ƒ}ƒl[ƒWƒƒ[
+    float timer; //æ™‚é–“çµŒé
+
+    GameObject gameMgr; //ã‚²ãƒ¼ãƒ ãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼
 
 
 
-    //íœ‚³‚ê‚éŠî€‚ÌYÀ•W’l
+    //å‰Šé™¤ã•ã‚Œã‚‹åŸºæº–ã®Yåº§æ¨™å€¤
     public float deletePosY = -50f;
 
-    public GameObject bulletPrefab;    // ”­Ë‚·‚é’e‚ÌPrefab
-    public GameObject gate;            // ’e‚ğ”­Ë‚·‚éˆÊ’u
-    public float bulletSpeed = 100f;   // ”­Ë‚·‚é’e‚Ì‘¬“x 
-    public float fireInterval = 2.0f;  // ’e‚ğ”­Ë‚·‚éƒCƒ“ƒ^[ƒoƒ‹
-    //public float rotationSpeed = 5   // ƒvƒŒƒCƒ„[‚Ì•ûŒü‚Ö‰ñ“]‚·‚é‘¬“x (ƒXƒ€[ƒY‚ÈLookAt—p)
+    public GameObject bulletPrefab;    // ç™ºå°„ã™ã‚‹å¼¾ã®Prefab
+    public GameObject gate;            // å¼¾ã‚’ç™ºå°„ã™ã‚‹ä½ç½®
+    public float bulletSpeed = 100f;   // ç™ºå°„ã™ã‚‹å¼¾ã®é€Ÿåº¦ 
+    public float fireInterval = 2.0f;  // å¼¾ã‚’ç™ºå°„ã™ã‚‹ã‚¤ãƒ³ã‚¿ãƒ¼ãƒãƒ«
+    //public float rotationSpeed = 5   // ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®æ–¹å‘ã¸å›è»¢ã™ã‚‹é€Ÿåº¦ (ã‚¹ãƒ ãƒ¼ã‚ºãªLookAtç”¨)
+
+    public GameObject flamePrefab; //å€’ã•ã‚ŒãŸæ™‚ã®ç‚ã‚¨ãƒ•ã‚§ã‚¯ãƒˆ
+
+
+    //éŸ³ã«ã¾ã¤ã‚ã‚‹ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã¨SEéŸ³æƒ…å ±
+    AudioSource audio;
+    public AudioClip se_shot;
+    public AudioClip se_damage;
+    public AudioClip se_exprosion;
 
     void Start()
     {
+        //playingãƒ¢ãƒ¼ãƒ‰ã§ãªã„ã¨ä½•ã‚‚ã—ãªã„
+        if (GameManager.gameState != GameState.playing) return;
+        gameMgr = GameObject.FindGameObjectWithTag("GM");
+
+        audio = GetComponent<AudioSource>();
+
         navMeshAgent = GetComponent<NavMeshAgent>();
         player = GameObject.FindGameObjectWithTag("Player");
 
+        //animator = GetComponent<Animator>(); //Animatorã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã‚’å–å¾—
+
         isAttack = false;
+        isDamage = false;
         lockOn = false;
 
-        timer = 0f; //Œo‰ßŠÔ‚ğŒv‘ª
+        timer = 0f; //çµŒéæ™‚é–“ã‚’è¨ˆæ¸¬
 
     }
 
 
     void Update()
     {
-        //playingƒ‚[ƒh‚Å‚È‚¢‚Æ‰½‚à‚µ‚È‚¢
+        //playingãƒ¢ãƒ¼ãƒ‰ã§ãªã„ã¨ä½•ã‚‚ã—ãªã„
         if (GameManager.gameState != GameState.playing) return;
 
-        //ƒvƒŒƒCƒ„[‚ª‚¢‚È‚¢ or ƒGƒlƒ~[‚ÌHP‚ª0‚Ì‚Í‰½‚à‚µ‚È‚¢
+        //ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒã„ãªã„æ™‚ or ã‚¨ãƒãƒŸãƒ¼ã®HPãŒ0ã®æ™‚ã¯ä½•ã‚‚ã—ãªã„
         if (player == null || enemyHP <= 0) return;
 
-        //ƒXƒe[ƒWŠO‚É—‚¿‚½‚çÁ–Å
+        // ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãŒå­˜åœ¨ã—ãªã„å ´åˆã€å…¨ã¦ã®å‹•ä½œã‚’åœæ­¢
+        if (player == null)
+        {
+            if (navMeshAgent != null)
+            {
+                navMeshAgent.isStopped = true; // ãƒŠãƒ“ã‚²ãƒ¼ã‚·ãƒ§ãƒ³ã‚’åœæ­¢
+            }
+            isAttack = false; // æ”»æ’ƒä¸­ãƒ•ãƒ©ã‚°ã‚‚ãƒªã‚»ãƒƒãƒˆ
+            lockOn = false;   // ãƒ­ãƒƒã‚¯ã‚ªãƒ³ã‚‚è§£é™¤
+            // Debug.Log("Playerã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã€‚EnemyControllerã‚’åœæ­¢ã—ã¾ã™ã€‚");
+            return; // ä»¥é™ã®Updateå‡¦ç†ã‚’ã‚¹ã‚­ãƒƒãƒ—
+        }
+
+        //ã‚¹ãƒ†ãƒ¼ã‚¸å¤–ã«è½ã¡ãŸã‚‰æ¶ˆæ»…
         if (transform.position.y <= deletePosY)
         {
             Destroy(gameObject);
             return;
         }
 
-        if (lockOn) //ƒ^[ƒQƒbƒg‚ğŒü‚­
+        if (lockOn) //ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã‚’å‘ã
         {
-            transform.LookAt(player.transform.position); // ‚±‚ê‚¾‚Æu‚É‰ñ“]
-            //LookAtPlayer(); // ƒXƒ€[ƒY‚È‰ñ“]
+            transform.LookAt(player.transform.position); // ã“ã‚Œã ã¨ç¬æ™‚ã«å›è»¢
+            //LookAtPlayer(); // ã‚¹ãƒ ãƒ¼ã‚ºãªå›è»¢
         }
 
-        if(isAttack) //UŒ‚’†‚È‚ç‰½‚à‚µ‚È‚¢
+        if(isAttack) //æ”»æ’ƒä¸­ãªã‚‰ä½•ã‚‚ã—ãªã„
         {
             return;
         }
 
-        //ƒvƒŒƒCƒ„[‚Æ‚Ì‹——£‚ğí‚É‘ª‚é
+        //ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã¨ã®è·é›¢ã‚’å¸¸ã«æ¸¬ã‚‹
         float distance = Vector3.Distance(transform.position, player.transform.position);
 
-        if (distance <= detectionRange) //õ“G”ÍˆÍ‚É“ü‚Á‚½‚ç•Ï”enemySpeed‚ÌƒXƒs[ƒh‚Å‹ß‚Ã‚¢‚Ä‚­‚é
+        if (distance <= detectionRange) //ç´¢æ•µç¯„å›²ã«å…¥ã£ãŸã‚‰å¤‰æ•°enemySpeedã®ã‚¹ãƒ”ãƒ¼ãƒ‰ã§è¿‘ã¥ã„ã¦ãã‚‹
         {
             lockOn = true;
-            navMeshAgent.isStopped = false;
-            navMeshAgent.SetDestination(player.transform.position);
-            navMeshAgent.speed = enemySpeed;
-
-            //Ë’ö”ÍˆÍ‚É“ü‚Á‚½‚çUŒ‚‚µ‚Â‚Â‚ä‚Á‚­‚è‹ß‚Ã‚¢‚¢‚Ä‚­‚é
+            if (navMeshAgent != null) // navMeshAgentãŒnullã§ãªã„ã“ã¨ã‚’ç¢ºèª
+            {
+                navMeshAgent.isStopped = false;
+                navMeshAgent.SetDestination(player.transform.position);
+                navMeshAgent.speed = enemySpeed;
+            }
+     
+            //å°„ç¨‹ç¯„å›²ã«å…¥ã£ãŸã‚‰æ”»æ’ƒã—ã¤ã¤ã‚†ã£ãã‚Šè¿‘ã¥ã„ã„ã¦ãã‚‹
             if (distance <= attackRange)
             {
-                
-                navMeshAgent.speed = enemySpeed * 0.5f; //”¼•ª‚Ì‘¬“x‚É‚·‚é
+                if (navMeshAgent != null) // navMeshAgentãŒnullã§ãªã„ã“ã¨ã‚’ç¢ºèª
+                {
+                    navMeshAgent.speed = enemySpeed * 0.5f; //åŠåˆ†ã®é€Ÿåº¦ã«ã™ã‚‹
+                }
 
                 if (Time.time >= timer)
                 {
                     StartCoroutine(Attack());
 
-                    //timer = Time.time + 1f / fireInterval; // Ÿ‚Ì”­Ë‰Â”\ŠÔ‚ğXV
+                    //timer = Time.time + 1f / fireInterval; // æ¬¡ã®ç™ºå°„å¯èƒ½æ™‚é–“ã‚’æ›´æ–°
                 }
             }
-            if(distance <= stopRange)
+            if (distance <= stopRange)
+            {
+                if (navMeshAgent != null) // navMeshAgentãŒnullã§ãªã„ã“ã¨ã‚’ç¢ºèª
+                {
+                    navMeshAgent.isStopped = true;
+                }
+
+            }
+        }
+        else // ç´¢æ•µç¯„å›²å¤–ã«å‡ºãŸã‚‰åœæ­¢
+        {
+            if (navMeshAgent != null) // navMeshAgentãŒnullã§ãªã„ã“ã¨ã‚’ç¢ºèª
             {
                 navMeshAgent.isStopped = true;
             }
-        }
-        else
-        {
-            navMeshAgent.isStopped = true;
-        }
 
+            lockOn = false; // ç´¢æ•µç¯„å›²å¤–ãªã‚‰ãƒ­ãƒƒã‚¯ã‚ªãƒ³è§£é™¤
+        }
 
 
         if (isDamage)
         {
-            StartCoroutine(Damaged());
+            Blinking(); //ãƒ€ãƒ¡ãƒ¼ã‚¸å—ã‘ãŸã‚‰ç‚¹æ»…å‡¦ç†
         }
         
 
@@ -126,7 +172,7 @@ public class EnemyController : MonoBehaviour
     IEnumerator Attack()
     {
         isAttack = true;
-        lockOn = false; // UŒ‚’†‚àƒvƒŒƒCƒ„[‚Ì•û‚ğŒü‚©‚¹‚½‚¢‚È‚çƒRƒƒ“ƒgƒAƒEƒg
+        lockOn = false; // æ”»æ’ƒä¸­ã‚‚ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®æ–¹ã‚’å‘ã‹ã›ãŸã„ãªã‚‰ã‚³ãƒ¡ãƒ³ãƒˆã‚¢ã‚¦ãƒˆ
         Shot();
         yield return new WaitForSeconds(fireInterval);
         isAttack = false;
@@ -135,100 +181,138 @@ public class EnemyController : MonoBehaviour
     }
 
 
-    // ’e‚ğ”­Ë‚·‚éƒƒ\ƒbƒh
+    // å¼¾ã‚’ç™ºå°„ã™ã‚‹ãƒ¡ã‚½ãƒƒãƒ‰
     void Shot()
     {
-        //enemy‚ªÁ–Å‚µ‚Ä‚¢‚ê‚Î‰½‚à‚µ‚È‚¢
-        if (gameObject == null) return;
+        if (GameManager.gameState != GameState.playing) return;
 
         if (player != null)
         {
-            //ƒvƒŒƒCƒ„[‚ÌˆÊ’u‚ÉBullet‚ğ¶¬
+            //ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ä½ç½®ã«Bulletã‚’ç”Ÿæˆ
             GameObject obj = Instantiate(
                 bulletPrefab,
                 gate.transform.position,
                 gate.transform.rotation * Quaternion.Euler(90,0,0));
 
-            //¶¬‚µ‚½Bullet‚ÌRigidbody‚ğæ“¾
+            //ç”Ÿæˆã—ãŸBulletã®Rigidbodyã‚’å–å¾—
             Rigidbody rbody = obj.GetComponent<Rigidbody>();
 
-            //•ûŒü‚ğ¶¬
+            //æ–¹å‘ã‚’ç”Ÿæˆ
             Vector3 v = new Vector3(
                 gate.transform.forward.x * shootSpeed,
                 gate.transform.forward.y * shootSpeed,
                 gate.transform.forward.z * shootSpeed);
 
-            //¶¬‚µ‚½‹…‚ÌAddForce‚Ì—Í‚Åshoot
+            //ç”Ÿæˆã—ãŸçƒã®AddForceã®åŠ›ã§shoot
             rbody.AddForce(v, ForceMode.Impulse);
+
+            SEPlay(SEType.Shot); //å°„æ’ƒéŸ³
         }
     }
 
 
-    //ÚG”»’è
-    private void OnControllerColliderHit(ControllerColliderHit hit)
+    //æ¥è§¦åˆ¤å®š
+    private void OnTriggerEnter(Collider hit)
     {
-        //‚Ô‚Â‚©‚Á‚½‘Šè‚ªPlayerBullet‚È‚ç
+        if (GameManager.gameState != GameState.playing) return;
+
+        //ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒã„ãªã„æ™‚ or ã‚¨ãƒãƒŸãƒ¼ã®HPãŒ0ã®æ™‚ã¯ä½•ã‚‚ã—ãªã„
+        if (player == null || enemyHP <= 0) return;
+
+        if (isDamage) return; // ãƒ€ãƒ¡ãƒ¼ã‚¸ä¸­ã¯å‡¦ç†ã—ãªã„ (ç„¡æ•µåˆ¤å®š)
+
+        //ã¶ã¤ã‹ã£ãŸç›¸æ‰‹ãŒPlayerBulletãªã‚‰
         if (hit.gameObject.CompareTag("PlayerBullet"))
         {
             isDamage = true;
+            StartCoroutine(Damaged());
 
-            //‘Ì—Í‚ğƒ}ƒCƒiƒX
+            //ä½“åŠ›ã‚’ãƒã‚¤ãƒŠã‚¹
             enemyHP--;
 
-            //ƒ_ƒ[ƒW‰¹‚ğ–Â‚ç‚·
+            if(enemyHP > 0)SEPlay(SEType.Damage); //ãƒ€ãƒ¡ãƒ¼ã‚¸éŸ³
+
+            //ãƒ€ãƒ¡ãƒ¼ã‚¸éŸ³ã‚’é³´ã‚‰ã™
             //SEPlay(SEType.Damage);
 
             if (enemyHP <= 0)
             {
-                //Instantiate(bom, transform.position, Quaternion.identity); //”š”­ƒGƒtƒFƒNƒg‚Ì”­¶
-                Destroy(gameObject, 0.5f); //­‚µŠÔ·‚Å©•ª‚ğÁ–Å
+                //animator.SetTrigger("Die"); //æ­»äº¡ã‚¢ãƒ‹ãƒ¡
+                Instantiate(flamePrefab, transform.position, Quaternion.identity); //ç‚ã®ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã‚’ç™ºç”Ÿ
+                SEPlay(SEType.Explosion); //å€’ã—ãŸéŸ³
+                Destroy(gameObject, 2f); //å°‘ã—æ™‚é–“å·®ã§è‡ªåˆ†ã‚’æ¶ˆæ»…
+                DestroyDeadEnemy();
             }
 
-            //ÚG‚µ‚½PlayerBullet‚ğíœ
-            Destroy(hit.gameObject);
+
+            //æ¥è§¦ã—ãŸPlayerBulletã‚’å‰Šé™¤
+            //Destroy(hit.gameObject);
         }
 
-        //‚Ô‚Â‚©‚Á‚½‘Šè‚ªPlsyerSword‚È‚ç
+        //ã¶ã¤ã‹ã£ãŸç›¸æ‰‹ãŒPlsyerSwordãªã‚‰
         if (hit.gameObject.CompareTag("PlayerSword"))
         {
             isDamage = true;
+            StartCoroutine(Damaged());
 
-            //‘Ì—Í‚ğ3ƒ}ƒCƒiƒX
+            //ä½“åŠ›ã‚’3ãƒã‚¤ãƒŠã‚¹
             enemyHP -= 3;
 
-            //ƒ_ƒ[ƒW‰¹‚ğ–Â‚ç‚·
+            if (enemyHP > 0) SEPlay(SEType.Damage); //ãƒ€ãƒ¡ãƒ¼ã‚¸éŸ³
+
+            //ãƒ€ãƒ¡ãƒ¼ã‚¸éŸ³ã‚’é³´ã‚‰ã™
             //SEPlay(SEType.Damage);
 
             if (enemyHP <= 0)
             {
-                //Instantiate(bom, transform.position, Quaternion.identity); //”š”­ƒGƒtƒFƒNƒg‚Ì”­¶
-                Destroy(gameObject, 0.5f); //­‚µŠÔ·‚Å©•ª‚ğÁ–Å
+                //animator.SetTrigger("Die"); //æ­»äº¡ã‚¢ãƒ‹ãƒ¡
+                Instantiate(flamePrefab, transform.position, Quaternion.identity); //ç‚ã®ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã‚’ç™ºç”Ÿ
+                SEPlay(SEType.Explosion); //å€’ã—ãŸéŸ³
+                Destroy(gameObject, 2f); //å°‘ã—æ™‚é–“å·®ã§è‡ªåˆ†ã‚’æ¶ˆæ»…
+                DestroyDeadEnemy();
             }
 
         }
+
     }
 
 
     IEnumerator Damaged()
     {
-        Blinking();
-        yield return new WaitForSeconds(2);
-
-        isDamage = false;
+        yield return new WaitForSeconds(1);
+        isDamage = false; //ç„¡æ•µæ™‚é–“çµ‚äº†
+        if (!isDamage) body.SetActive(true); // bodyã‚’è¡¨ç¤ºçŠ¶æ…‹ã«æˆ»ã™
     }
 
-    //“_–Åˆ—
+    //ç‚¹æ»…å‡¦ç†
     void Blinking()
     {
-        //‚»‚Ì‚ÌƒQ[ƒ€isŠÔ‚Å³‚©•‰‚©‚Ì’l‚ğZo
+        //ãã®æ™‚ã®ã‚²ãƒ¼ãƒ é€²è¡Œæ™‚é–“ã§æ­£ã‹è² ã‹ã®å€¤ã‚’ç®—å‡º
         float val = Mathf.Sin(Time.time * 50);
-        //³‚ÌüŠú‚È‚ç•\¦
+        //æ­£ã®å‘¨æœŸãªã‚‰è¡¨ç¤º
         if (val >= 0) body.SetActive(true);
-        //•‰‚ÌüŠú‚È‚ç”ñ•\¦
+        //è² ã®å‘¨æœŸãªã‚‰éè¡¨ç¤º
         else body.SetActive(false);
     }
 
-    // ƒMƒYƒ‚‚Å”ÍˆÍ‚ğ•\¦iƒfƒoƒbƒO—pj
+    //SEå†ç”Ÿ
+    public void SEPlay(SEType type)
+    {
+        switch (type)
+        {
+            case SEType.Shot:
+                audio.PlayOneShot(se_shot);
+                break;
+            case SEType.Damage:
+                audio.PlayOneShot(se_damage);
+                break;
+            case SEType.Explosion:
+                audio.PlayOneShot(se_exprosion);
+                break;
+        }
+    }
+
+    // ã‚®ã‚ºãƒ¢ã§ç¯„å›²ã‚’è¡¨ç¤ºï¼ˆãƒ‡ãƒãƒƒã‚°ç”¨ï¼‰
     void OnDrawGizmosSelected()
     {
         Gizmos.DrawWireSphere(transform.position, detectionRange);
@@ -236,5 +320,13 @@ public class EnemyController : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, stopRange);
     }
 
+    // ã‚¨ãƒãƒŸãƒ¼ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãŒç ´æ£„ã•ã‚Œã‚‹ã¨ãã«ãƒªã‚¹ãƒˆã®å…ˆé ­ã‹ã‚‰å‰Šé™¤ã™ã‚‹
+    void DestroyDeadEnemy()
+    {
+        GameManager gm = gameMgr.GetComponent<GameManager>();
+        GameObject deadEnemy = gm.enemyList[0];
+        gm.enemyList.RemoveAt(0);
+        //Destroy(deadEnemy,2f);
+    }
 
 }
