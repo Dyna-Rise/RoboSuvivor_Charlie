@@ -1,5 +1,6 @@
-using UnityEngine;
 using System.Collections;
+using UnityEngine;
+using UnityEngine.Audio;
 
 public class PlayerController : MonoBehaviour
 {
@@ -36,10 +37,24 @@ public class PlayerController : MonoBehaviour
     private PlayerAnimation playerAnimation;
 
     // PlayerAnimationに渡すための最終的な入力方向（修正版PlayerAnimationで使用）
-    [HideInInspector] public Vector3 lastMoveInput = Vector3.forward; 
+    [HideInInspector] public Vector3 lastMoveInput = Vector3.forward;
+
+
+    AudioSource audioSource;
+
+    public AudioClip se_Walk;
+    public AudioClip se_Damage;
+    public AudioClip se_Explosion;
+    public AudioClip se_Jump;
+
+
+    //足音判定
+    float footstepInterval = 0.6f; //足音間隔
+    float footstepTimer; //時間計測
 
     void Start()
     {
+        audioSource = GetComponent<AudioSource>();
         controller = GetComponent<CharacterController>();
         playerAnimation = GetComponent<PlayerAnimation>();
         
@@ -59,6 +74,8 @@ public class PlayerController : MonoBehaviour
         // 状態チェック: gameover, pause, option の場合、移動と入力を停止
         if (GameManager.gameState != GameState.playing && GameManager.gameState != GameState.gameclear)
         {
+
+
             moveDirection.x = 0;
             moveDirection.z = 0;
             
@@ -88,6 +105,12 @@ public class PlayerController : MonoBehaviour
         }
 
 
+
+        // ダメージ中の点滅処理
+        if (isDamage)
+        {
+            Blinking();
+        }
         // --- 移動・ジャンプ・ダッシュ ---
 
         // ダッシュ状態の更新
@@ -138,6 +161,7 @@ public class PlayerController : MonoBehaviour
             if (Input.GetButtonDown("Jump"))
             {
                 moveDirection.y = jumpForce;
+                audioSource.PlayOneShot(se_Jump);
             }
         }
 
@@ -151,6 +175,9 @@ public class PlayerController : MonoBehaviour
         
         // 実際の移動の実行
         controller.Move(moveDirection * Time.deltaTime);
+
+        //足音
+        HandleFootsteps();
     }
     
     /// <summary>
@@ -173,14 +200,33 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void OnControllerColliderHit(ControllerColliderHit hit)
+    private void OnTriggerEnter(Collider hit)
     {
         // 衝突したオブジェクトのタグが"Enemy" または "EnemyBullet" で、現在無敵時間中（isDamage = true）でない場合
         if (!isDamage)
         {
-            if (hit.gameObject.CompareTag("Enemy") || hit.gameObject.CompareTag("EnemyBullet"))
+            if (hit.gameObject.CompareTag("Enemy") || hit.gameObject.CompareTag("EnemyBullet") || hit.gameObject.CompareTag("Barrier")) 
             {
-                SetDamageState(true);
+                //SetDamageState(true);
+
+                //ダメージ中なら何もしない
+                if (isDamage) return;
+
+                isDamage = true; //ダメージ中
+                GameManager.playerHP--; //プレイヤーHP現象
+                audioSource.PlayOneShot(se_Damage);
+
+                if (GameManager.playerHP <= 0) //プレイヤーHPがなくなったら
+                {
+                    audioSource.PlayOneShot(se_Explosion);
+
+                    //ゲームオーバーへ
+                    GameManager.gameState = GameState.gameover;
+                    Destroy(gameObject, 1.0f);
+                }
+
+                //ダメージリセット
+                StartCoroutine(DamageReset());
             }
         }
     }
@@ -189,62 +235,99 @@ public class PlayerController : MonoBehaviour
     /// <summary>
     /// ダメージ状態を設定し、HPを減らし、ゲームオーバー判定を行う
     /// </summary>
-    public void SetDamageState(bool damageState)
-    {
-        // isDamage が false のときに damageState = true が来たら、ダメージ処理を開始
-        if (damageState && !isDamage)
-        {
-            isDamage = true; // 無敵時間開始
+    //public void SetDamageState(bool damageState)
+    //{
+    //    // isDamage が false のときに damageState = true が来たら、ダメージ処理を開始
+    //    if (damageState && !isDamage)
+    //    {
+    //        isDamage = true; // 無敵時間開始
             
-            // ダメージを受けたときにHPを減らす処理
-            if (GameManager.playerHP > 0)
-            {
-                GameManager.playerHP -= 1; // HPを減らす
-            }
+    //        // ダメージを受けたときにHPを減らす処理
+    //        if (GameManager.playerHP > 0)
+    //        {
+    //            GameManager.playerHP -= 1; // HPを減らす
+    //        }
             
-            // HPが0になったらゲームオーバーにする
-            if (GameManager.playerHP <= 0 && GameManager.gameState == GameState.playing)
-            {
-                GameManager.gameState = GameState.gameover;
-            }
+    //        // HPが0になったらゲームオーバーにする
+    //        if (GameManager.playerHP <= 0 && GameManager.gameState == GameState.playing)
+    //        {
+    //            GameManager.gameState = GameState.gameover;
+    //        }
             
-            // ダメージを受けたとき点滅コルーチンを開始
-            if (GameManager.gameState == GameState.playing || GameManager.gameState == GameState.gameclear)
-            {
-                 StartCoroutine(BlinkEffect());
-            }
-        }
-        // damageState = false が来たとき (点滅コルーチン終了後)
-        else if (!damageState)
-        {
-            isDamage = false; // 無敵時間終了
-            // 無敵時間終了時に、ボディを表示状態に戻す
-            if (body != null && body.TryGetComponent<Renderer>(out var renderer))
-            {
-                renderer.enabled = true;
-            }
-        }
-    }
+    //        // ダメージを受けたとき点滅コルーチンを開始
+    //        if (GameManager.gameState == GameState.playing || GameManager.gameState == GameState.gameclear)
+    //        {
+    //             StartCoroutine(BlinkEffect());
+    //        }
+    //    }
+    //    // damageState = false が来たとき (点滅コルーチン終了後)
+    //    else if (!damageState)
+    //    {
+    //        isDamage = false; // 無敵時間終了
+    //        // 無敵時間終了時に、ボディを表示状態に戻す
+    //        if (body != null && body.TryGetComponent<Renderer>(out var renderer))
+    //        {
+    //            renderer.enabled = true;
+    //        }
+    //    }
+    //}
 
     // 点滅処理（コルーチン）
-    private IEnumerator BlinkEffect()
+    //private IEnumerator BlinkEffect()
+    //{
+    //    // 処理続行前にRendererの有無を確認
+    //    if (body == null || !body.TryGetComponent<Renderer>(out var bodyRenderer))
+    //    {
+    //        SetDamageState(false);
+    //        yield break;
+    //    }
+
+    //    float endTime = Time.time + invulnerabilityDuration;
+
+    //    while (Time.time < endTime)
+    //    {
+    //        bodyRenderer.enabled = !bodyRenderer.enabled;
+    //        yield return new WaitForSeconds(blinkInterval);
+    //    }
+
+    //    // 点滅終了後、ダメージ状態を解除し、ボディを再表示
+    //    SetDamageState(false);
+    //}
+
+    //ダメージリセットのコルーチン
+    IEnumerator DamageReset()
     {
-        // 処理続行前にRendererの有無を確認
-        if (body == null || !body.TryGetComponent<Renderer>(out var bodyRenderer))
+        yield return new WaitForSeconds(1.0f); // 点滅時間
+
+        isDamage = false; //ダメージ中の解除
+        body.SetActive(true); //明確に姿を表示
+    }
+
+    //点滅メソッド
+    void Blinking()
+    {
+        float val = Mathf.Sin(Time.time * 50);
+        if (val > 0) body.SetActive(true);
+        else body.SetActive(false);
+    }
+
+    //足音
+    void HandleFootsteps()
+    {
+        //プレイヤーが動いていれば
+        if (moveDirection.x != 0 || moveDirection.z != 0)
         {
-            SetDamageState(false);
-            yield break;
+            footstepTimer += Time.deltaTime; //時間計測
+
+            if (footstepTimer >= footstepInterval) //インターバルチェック
+            {
+                audioSource.PlayOneShot(se_Walk);
+                footstepTimer = 0;
+            }
         }
-
-        float endTime = Time.time + invulnerabilityDuration;
-
-        while (Time.time < endTime)
+        else //動いていなければ時間計測リセット
         {
-            bodyRenderer.enabled = !bodyRenderer.enabled;
-            yield return new WaitForSeconds(blinkInterval);
+            footstepTimer = 0f;
         }
-
-        // 点滅終了後、ダメージ状態を解除し、ボディを再表示
-        SetDamageState(false);
     }
 }

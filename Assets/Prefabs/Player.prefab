@@ -156,6 +156,11 @@ GameObject:
   - component: {fileID: 9171041268891333109}
   - component: {fileID: 6739547474843173309}
   - component: {fileID: 6092372404559844531}
+  - component: {fileID: 3768132706783561725}
+  - component: {fileID: 2159153821468485412}
+  - component: {fileID: 5307081200893672959}
+  - component: {fileID: 5107622723310687089}
+  - component: {fileID: 5201429614091302931}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -326,6 +331,97 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &3768132706783561725
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9039041703142723107}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39167068fef79fd42b4e633f2edefe68, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  body: {fileID: 9008698450713019217}
+  moveSpeed: 5
+  dashSpeed: 10
+  gravity: 20
+  jumpForce: 8
+  dashDuration: 0.5
+  dashThreshold: 0.2
+  invulnerabilityDuration: 2
+  blinkInterval: 0.1
+  lastMoveInput: {x: 0, y: 0, z: 1}
+  se_Walk: {fileID: 8300000, guid: 33144b636bb27d146b2a7067933c6e7b, type: 3}
+  se_Damage: {fileID: 8300000, guid: 0d30ac30267e842419537598daf5f23d, type: 3}
+  se_Explosion: {fileID: 8300000, guid: 0bdbb689c62e18943b959eb8102051b0, type: 3}
+  se_Jump: {fileID: 8300000, guid: 6de6c0609083807469c50b03c0776a8a, type: 3}
+--- !u!114 &2159153821468485412
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9039041703142723107}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27673803af009414fb9e60542e83a55b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 5413105177756495452}
+--- !u!114 &5307081200893672959
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9039041703142723107}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19c7bcd1530c04bb198a71c553e687fc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bulletPrefab: {fileID: 6661650154168110023, guid: 474f41b5d7352454da578f36c4c2835a, type: 3}
+  shootPower: 100
+  RecoverySeconds: 3
+  se_shot: {fileID: 8300000, guid: e9d67448e6d9ef749a7b4bdf5711c64b, type: 3}
+--- !u!114 &5107622723310687089
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9039041703142723107}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fad4c6e68b11c5249a4f76b0286cb549, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  swordCollider: {fileID: 440608606131429329}
+  swordPrefab: {fileID: 9151639417806382172, guid: 6017007c4ebd9314ea5cb9d5f35c9c40, type: 3}
+  deleteTime: 0.5
+  se_Sword: {fileID: 8300000, guid: cccd8d2a957120c469a64a4b265b5666, type: 3}
+--- !u!114 &5201429614091302931
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9039041703142723107}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7208ee127e42d854c9b00cf45bdd4842, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dashSpeedMultiplier: 2
+  maxDashStamina: 100
+  currentDashStamina: 0
+  dashStaminaConsumptionRate: 30
+  dashStaminaRecoveryRate: 20
+  dashStaminaRecoveryDelay: 1
+  doublePressTimeThreshold: 0.2
+  se_Dash: {fileID: 8300000, guid: 8620b9900bd094947b8945dfc2eff28b, type: 3}
 --- !u!1001 &2405631957713543553
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -835,6 +931,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c98043d57e0190845b790d7b92990bee, type: 3}
+--- !u!95 &5413105177756495452 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 7673487250857332701, guid: c98043d57e0190845b790d7b92990bee, type: 3}
+  m_PrefabInstance: {fileID: 2405631957713543553}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &5413105178189074905 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7673487251499544664, guid: c98043d57e0190845b790d7b92990bee, type: 3}

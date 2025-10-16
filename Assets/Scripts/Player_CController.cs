@@ -16,21 +16,21 @@ public class Player_CController : MonoBehaviour
         float horizontalInput = Input.GetAxisRaw("Horizontal");
         float verticalInput = Input.GetAxisRaw("Vertical");
 
-        // ƒLƒƒƒ‰ƒNƒ^[‚Ìƒ[ƒJƒ‹À•W‚ğl—¶‚µ‚ÄˆÚ“®•ûŒü‚ğŒvZ
+        // ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼ã®ãƒ­ãƒ¼ã‚«ãƒ«åº§æ¨™ã‚’è€ƒæ…®ã—ã¦ç§»å‹•æ–¹å‘ã‚’è¨ˆç®—
         Vector3 forwardMovement = transform.forward * verticalInput;
         Vector3 rightMovement = transform.right * horizontalInput;
 
-        moveDirection = (forwardMovement + rightMovement).normalized; // ³‹K‰»‚µ‚ÄÎ‚ßˆÚ“®‚Ì‘¬“x‚ğˆê’è‚É•Û‚Â
+        moveDirection = (forwardMovement + rightMovement).normalized; // æ­£è¦åŒ–ã—ã¦æ–œã‚ç§»å‹•ã®é€Ÿåº¦ã‚’ä¸€å®šã«ä¿ã¤
 
-        moveDirection.y += Physics.gravity.y * Time.deltaTime; // d—Í‚Í•Ê“r‰ÁZ
+        moveDirection.y += Physics.gravity.y * Time.deltaTime; // é‡åŠ›ã¯åˆ¥é€”åŠ ç®—
 
-        // CharacterController.Move‚Íd—Í‚Ì‰e‹¿‚ğ•Ê“rl—¶‚·‚é•K—v‚ª‚ ‚è‚Ü‚·
-        // ¡‰ñ‚ÍmoveDirection.y‚É’¼Ú‰ÁZ‚µ‚Ä‚¢‚Ü‚·
+        // CharacterController.Moveã¯é‡åŠ›ã®å½±éŸ¿ã‚’åˆ¥é€”è€ƒæ…®ã™ã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™
+        // ä»Šå›ã¯moveDirection.yã«ç›´æ¥åŠ ç®—ã—ã¦ã„ã¾ã™
         characterCnt.Move(moveDirection * speed * Time.deltaTime);
 
         if (characterCnt.isGrounded)
         {
-            moveDirection.y = 0; // ’n–Ê‚É‚¢‚é‚Æ‚«‚ÍY²‚Ì‘¬“x‚ğƒŠƒZƒbƒg
+            moveDirection.y = 0; // åœ°é¢ã«ã„ã‚‹ã¨ãã¯Yè»¸ã®é€Ÿåº¦ã‚’ãƒªã‚»ãƒƒãƒˆ
         }
     }
 }
