@@ -20,8 +20,6 @@ public class Shooter : MonoBehaviour
     AudioSource audio;
     public AudioClip se_shot;
 
-
-
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -117,8 +115,9 @@ public class Shooter : MonoBehaviour
         if (GameManager.shotRemainingNum < 20)
         {
             GameManager.shotRemainingNum++; //1つ回復
-            bulletRecover = false; //弾回復フラグオフ
+            //bulletRecover = false; //弾回復フラグオフ
         }
+        bulletRecover = false; //弾回復フラグオフ
     }
 
     //攻撃中解除

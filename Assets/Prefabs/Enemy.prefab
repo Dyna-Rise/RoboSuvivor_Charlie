@@ -317,6 +317,7 @@ MonoBehaviour:
   enemyHP: 5
   enemySpeed: 3
   body: {fileID: 6587843039138566610}
+  animator: {fileID: 7963654138674662152}
   deletePosY: -50
   bulletPrefab: {fileID: 6661650154168110023, guid: d6af67595b24ddb4dbea8a0f393d64c8, type: 3}
   gate: {fileID: 7844889968726266431}
@@ -709,5 +710,10 @@ PrefabInstance:
 --- !u!4 &7963654138667148458 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7072444061591351794, guid: 910177ec26b76c14996c2d53627a6def, type: 3}
+  m_PrefabInstance: {fileID: 910513661580809560}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &7963654138674662152 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 7072444061582351952, guid: 910177ec26b76c14996c2d53627a6def, type: 3}
   m_PrefabInstance: {fileID: 910513661580809560}
   m_PrefabAsset: {fileID: 0}

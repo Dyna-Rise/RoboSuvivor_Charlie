@@ -31,6 +31,8 @@ public class EnemyController : MonoBehaviour
 
     GameObject gameMgr; //ゲームマネージャー
 
+    public Animator animator;
+
 
 
     //削除される基準のY座標値
@@ -62,14 +64,11 @@ public class EnemyController : MonoBehaviour
         navMeshAgent = GetComponent<NavMeshAgent>();
         player = GameObject.FindGameObjectWithTag("Player");
 
-        //animator = GetComponent<Animator>(); //Animatorコンポーネントを取得
 
         isAttack = false;
         isDamage = false;
-        lockOn = false;
 
         timer = 0f; //経過時間を計測
-
     }
 
 
@@ -78,8 +77,8 @@ public class EnemyController : MonoBehaviour
         //playingモードでないと何もしない
         if (GameManager.gameState != GameState.playing) return;
 
-        //プレイヤーがいない時 or エネミーのHPが0の時は何もしない
-        if (player == null || enemyHP <= 0) return;
+        //エネミーのHPが0の時は何もしない
+        if (enemyHP <= 0) return;
 
         // プレイヤーオブジェクトが存在しない場合、全ての動作を停止
         if (player == null)
@@ -101,15 +100,9 @@ public class EnemyController : MonoBehaviour
             return;
         }
 
-        if (lockOn) //ターゲットを向く
+        if (isDamage)
         {
-            transform.LookAt(player.transform.position); // これだと瞬時に回転
-            //LookAtPlayer(); // スムーズな回転
-        }
-
-        if(isAttack) //攻撃中なら何もしない
-        {
-            return;
+            Blinking(); //ダメージ受けたら点滅処理
         }
 
         //プレイヤーとの距離を常に測る
@@ -117,14 +110,18 @@ public class EnemyController : MonoBehaviour
 
         if (distance <= detectionRange) //索敵範囲に入ったら変数enemySpeedのスピードで近づいてくる
         {
-            lockOn = true;
+            if (lockOn) //ターゲットを向く
+            {
+                transform.LookAt(player.transform.position); // これだと瞬時に回転
+                //LookAtPlayer(); // スムーズな回転
+            }
             if (navMeshAgent != null) // navMeshAgentがnullでないことを確認
             {
                 navMeshAgent.isStopped = false;
                 navMeshAgent.SetDestination(player.transform.position);
                 navMeshAgent.speed = enemySpeed;
             }
-     
+
             //射程範囲に入ったら攻撃しつつゆっくり近づいいてくる
             if (distance <= attackRange)
             {
@@ -133,20 +130,25 @@ public class EnemyController : MonoBehaviour
                     navMeshAgent.speed = enemySpeed * 0.5f; //半分の速度にする
                 }
 
+                if (isAttack) //攻撃中なら何もしない
+                {
+                    return;
+                }
+
                 if (Time.time >= timer)
                 {
                     StartCoroutine(Attack());
 
                     //timer = Time.time + 1f / fireInterval; // 次の発射可能時間を更新
                 }
-            }
-            if (distance <= stopRange)
-            {
-                if (navMeshAgent != null) // navMeshAgentがnullでないことを確認
+                if (distance <= stopRange)
                 {
-                    navMeshAgent.isStopped = true;
-                }
+                    if (navMeshAgent != null) // navMeshAgentがnullでないことを確認
+                    {
+                        navMeshAgent.isStopped = true;
+                    }
 
+                }
             }
         }
         else // 索敵範囲外に出たら停止
@@ -160,24 +162,18 @@ public class EnemyController : MonoBehaviour
         }
 
 
-        if (isDamage)
-        {
-            Blinking(); //ダメージ受けたら点滅処理
-        }
-        
-
     }
 
-    
+
     IEnumerator Attack()
     {
         isAttack = true;
         lockOn = false; // 攻撃中もプレイヤーの方を向かせたいならコメントアウト
+        yield return new WaitForSeconds(fireInterval); //プレイヤーの逃げる猶予
         Shot();
-        yield return new WaitForSeconds(fireInterval);
         isAttack = false;
         lockOn = true;
-        timer = 0f;  
+        timer = 0f;
     }
 
 
@@ -192,7 +188,7 @@ public class EnemyController : MonoBehaviour
             GameObject obj = Instantiate(
                 bulletPrefab,
                 gate.transform.position,
-                gate.transform.rotation * Quaternion.Euler(90,0,0));
+                gate.transform.rotation * Quaternion.Euler(90, 0, 0));
 
             //生成したBulletのRigidbodyを取得
             Rigidbody rbody = obj.GetComponent<Rigidbody>();
@@ -222,41 +218,19 @@ public class EnemyController : MonoBehaviour
         if (isDamage) return; // ダメージ中は処理しない (無敵判定)
 
         //ぶつかった相手がPlayerBulletなら
-        if (hit.gameObject.CompareTag("PlayerBullet"))
+        if (hit.gameObject.CompareTag("PlayerBullet") || hit.gameObject.CompareTag("PlayerSword"))
         {
             isDamage = true;
-            StartCoroutine(Damaged());
 
             //体力をマイナス
             enemyHP--;
 
-            if(enemyHP > 0)SEPlay(SEType.Damage); //ダメージ音
-
-            //ダメージ音を鳴らす
-            //SEPlay(SEType.Damage);
-
-            if (enemyHP <= 0)
+            //ぶつかった相手がPlsyerSwordなら
+            if (hit.gameObject.CompareTag("PlayerSword"))
             {
-                //animator.SetTrigger("Die"); //死亡アニメ
-                Instantiate(flamePrefab, transform.position, Quaternion.identity); //炎のエフェクトを発生
-                SEPlay(SEType.Explosion); //倒した音
-                Destroy(gameObject, 2f); //少し時間差で自分を消滅
-                DestroyDeadEnemy();
+                //体力を3マイナス
+                enemyHP -= 3;
             }
-
-
-            //接触したPlayerBulletを削除
-            //Destroy(hit.gameObject);
-        }
-
-        //ぶつかった相手がPlsyerSwordなら
-        if (hit.gameObject.CompareTag("PlayerSword"))
-        {
-            isDamage = true;
-            StartCoroutine(Damaged());
-
-            //体力を3マイナス
-            enemyHP -= 3;
 
             if (enemyHP > 0) SEPlay(SEType.Damage); //ダメージ音
 
@@ -265,15 +239,16 @@ public class EnemyController : MonoBehaviour
 
             if (enemyHP <= 0)
             {
-                //animator.SetTrigger("Die"); //死亡アニメ
-                Instantiate(flamePrefab, transform.position, Quaternion.identity); //炎のエフェクトを発生
+                animator.SetTrigger("die"); //死亡アニメ
+                Instantiate(flamePrefab, transform.position, flamePrefab.transform.rotation); //炎のエフェクトを発生
                 SEPlay(SEType.Explosion); //倒した音
                 Destroy(gameObject, 2f); //少し時間差で自分を消滅
                 DestroyDeadEnemy();
             }
 
-        }
+            StartCoroutine(Damaged());
 
+        }
     }
 
 
