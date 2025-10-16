@@ -13,9 +13,9 @@ public class BossController : MonoBehaviour
     const float StunDuration = 0.5f;                // スタン状態の時間
 
     //<<< パブリック変数 >>>
-    public int bossHP = 30;                          // ヒットポイント
+    public int bossHP = 30;                         // ヒットポイント
     public GameObject body;                         // 自身のボディ(点滅対象)
-    public float closeRange = 3f;                   // プレイヤーとの距離が近いと判断する距離(近接攻撃をする距離)
+    public float closeRange = 10f;                  // プレイヤーとの距離が近いと判断する距離(近接攻撃をする距離)
     public float barrierDeploymentDistance = 5f;    // パリアを展開させるプレイヤーとの距離 
     public float attackInterval = 5f;               // 攻撃のクールダウン
     public GameObject bulletPrefab;                 // 飛ばす弾のプレハブ
@@ -23,6 +23,7 @@ public class BossController : MonoBehaviour
     public float moveSpeed = 0.5f;                  // 移動スピード(タックルの移動速度)
     public GameObject gate;                         // 弾を生成する位置
     public GameObject barrierPrefab;                // パリアープレハブ
+    public GameObject explosionPrefab;              // エクスプロージョンプレハブ
 
     //<<< ローカル変数 >>>
     GameObject player;                  // プレイヤー情報
@@ -37,6 +38,14 @@ public class BossController : MonoBehaviour
     float timer;                         // 時間経過
     bool isAttacking;                    // 攻撃中かどうか
 
+    // 音にまつわるコンポーネントとSE音情報
+    AudioSource audio;
+    public AudioClip se_Tackle;
+    public AudioClip se_Damage;
+    public AudioClip se_Barrier;
+    public AudioClip se_Explosion;
+    public AudioClip se_Shot;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -44,6 +53,7 @@ public class BossController : MonoBehaviour
         rbody = GetComponent<Rigidbody>();    // Rigidbodyを得る
                                               //        animator = GetComponent<Animator>();    //Animatorを得る
         player = GameObject.FindGameObjectWithTag("Player"); //プレイヤー情報を得る
+        audio = GetComponent<AudioSource>();
 
     }
 
@@ -109,12 +119,12 @@ public class BossController : MonoBehaviour
         //<<< 攻撃処理 >>>
         // プレイヤーとの距離を求める
         playerDistance = Vector3.Distance(transform.position, player.transform.position);
-        Debug.Log($"longDistance={closeRange} playerDistance={playerDistance}");
+//        Debug.Log($"longDistance={closeRange} playerDistance={playerDistance}");
         // プレイヤーとの距離を判定する
         // 遠距離判定距離よりもプレイヤーとの距離が近いか？
         if (closeRange >= playerDistance)  // プレイヤーとの距離が近い時
         {
-            Debug.Log("Is Near");
+            //Debug.Log("Is Near");
             // 攻撃実行中でなければ近距離攻撃を行う
             if (!isAttacking)
             {
@@ -122,13 +132,13 @@ public class BossController : MonoBehaviour
                 isAttacking = true;                    // 攻撃中かどうか
 
                 // バリア展開コルーチンを呼び出す
-                Debug.Log($"longDistance={closeRange} playerDistance={playerDistance}");
+//                Debug.Log($"longDistance={closeRange} playerDistance={playerDistance}");
                 StartCoroutine(Barrier());
             }
         }
         else  // プレイヤーとの距離が遠い時
         {
-            Debug.Log("Is Far");
+            //Debug.Log("Is Far");
             //////Debug.Log($"Is Attacking={isAttacking}");
             // 現在プレイヤーとの距離が近いと判断している           
             // 距離が遠い判定フラグをセットする
@@ -136,7 +146,7 @@ public class BossController : MonoBehaviour
 
             // ランダムで遠距離処理選択用の0,1の2択の値を作成する
             int rnd = Random.Range(0, 2); // ※ 0～1の範囲でランダムな整数値が返る
-            //rnd = 0;    // デバッグ
+ //!!!           rnd = 1;    // デバッグ
 
             // 攻撃中では無い？
             if (!isAttacking)
@@ -147,7 +157,7 @@ public class BossController : MonoBehaviour
                 //Debug.Log($"Is Attacking={isAttacking}");
                 if (rnd == 0)
                 {
-                    Debug.Log("Tackle()");
+                    //Debug.Log("Tackle()");
                     // タックルコルーチンを呼び出す
                     StartCoroutine(Tackle());
                 }
@@ -172,10 +182,13 @@ public class BossController : MonoBehaviour
     /// <returns></returns>
     IEnumerator Barrier()
     {
-        Debug.Log("Barrier()");
+        //Debug.Log("Barrier()");
 
         // バリア発生までのウエイト(プレイヤーが斬撃するための隙を作る)
         yield return new WaitForSeconds(1.0f);
+
+        // SEの再生
+        SEPlay(SEType.Barrier);
 
         //<<< バリアを表示する >>>
         // バリアプレアブを生成する
@@ -191,7 +204,7 @@ public class BossController : MonoBehaviour
 
         // 攻撃中フラグをクリアする
         isAttacking = false;                    // 攻撃中かどうか
-        Debug.Log("Barrier OFF");
+        //Debug.Log("Barrier OFF");
 
     }
 
@@ -201,21 +214,27 @@ public class BossController : MonoBehaviour
     /// <returns></returns>
     IEnumerator Tackle()
     {
-        Debug.Log("Tackle()");
+        //Debug.Log("Tackle()");
+        float targetDistance = transform.localScale.x / 2.0f * 0.8f;   // 目標距離
 
         // プレイヤーの位置を取得する
         Vector3 playerPosition = player.transform.position;
 
-        // プレイヤーに向かって設定されている近接位置まで移動する
-        while (Vector3.Distance(transform.position, playerPosition) > closeRange)             // プレイヤーとの距離が近いと判断する距離(近接攻撃をする距離)
+        // プレイヤーに向かって設定されている近接位置まで移動する(タックルも攻撃なのでプレイヤーに接触する位置まで移動する）
+//        while (Vector3.Distance(transform.position, playerPosition) > closeRange)             // プレイヤーとの距離が近いと判断する距離(近接攻撃をする距離)
+        while (Vector3.Distance(transform.position, playerPosition) > targetDistance)
         {
             transform.position = Vector3.Lerp(transform.position, playerPosition, Time.deltaTime);
             // 次のフレームまで待機
             yield return null;
         }
+
+        // SEの再生
+        SEPlay(SEType.Tackle);
+
         // 攻撃中フラグをクリアする
         isAttacking = false;           // 攻撃中かどうか
-        Debug.Log("Tackle() isAttacking = fales");
+        //Debug.Log("Tackle() isAttacking = fales");
     }
 
 
@@ -254,6 +273,8 @@ public class BossController : MonoBehaviour
         // バーストショット処理
         while (burstCount > shotCount)
         {
+            if (!body.activeSelf) break;
+
             // ゲートを攻撃対象に向ける
             gate.transform.LookAt(player.transform);
 
@@ -265,10 +286,15 @@ public class BossController : MonoBehaviour
 
             // 弾のRigidbodyを読みだす
             Rigidbody bulletRbody = bullet.GetComponent<Rigidbody>();
+            bulletRbody.useGravity = false;  // 光線兵器なら重力の影響をOFFにする
+
+            // SEの再生
+            SEPlay(SEType.Shot);
 
             // 弾を打ち出す
             shotCount++;
-            bulletRbody.AddForce(gate.transform.forward * bulletSpeed, ForceMode.Impulse);
+//            bulletRbody.AddForce(gate.transform.forward * bulletSpeed, ForceMode.Impulse);  // ゲートの正面から弾を撃ちだす
+            bulletRbody.AddForce((player.transform.position - gate.transform.position).normalized * bulletSpeed, ForceMode.Impulse);  // プレイヤーに向けて弾を撃ちだす
 
             // とりあえず弾を消去する
             StartCoroutine(DestroyBullet(bullet));
@@ -288,7 +314,7 @@ public class BossController : MonoBehaviour
     /// <returns></returns>
     IEnumerator DestroyBullet(GameObject bullet)
     {
-        // とりあえず0.5秒後に弾を消去する
+        // とりあえずn秒後に弾を消去する
         yield return new WaitForSeconds(3.5f);
         Destroy(bullet);
     }
@@ -345,7 +371,7 @@ public class BossController : MonoBehaviour
         if (GameManager.gameState != GameState.playing) return;
 
 
-        Debug.Log("OnTriggerEnter()");
+        //Debug.Log("OnTriggerEnter()");
         // 接触したのがプレイヤーの弾だったら
         if (collision.gameObject.CompareTag("PlayerBullet"))
         {
@@ -363,20 +389,23 @@ public class BossController : MonoBehaviour
         // 既にプレイヤーの弾と接触中ならば何もしない
         if (IsStun()) return;
 
+        // SEの再生
+        SEPlay(SEType.Damage);
+
         if (playerSword)  // ソード
         {
             // HPの減算(3倍)更新
             bossHP -= 3;
-            Debug.Log($"sword={bossHP}");
+            //Debug.Log($"sword={bossHP}");
         }
         else  // 弾
         {
             // HPの減算更新
             bossHP--;
-            Debug.Log($"bllet={bossHP}");
+            //Debug.Log($"bllet={bossHP}");
         }
 
-        Debug.Log($"bossHp={bossHP}");
+        //Debug.Log($"bossHp={bossHP}");
         // HPの残量による処理
         if (bossHP > 0)
         {
@@ -386,7 +415,15 @@ public class BossController : MonoBehaviour
         }
         else
         {
-            // ゲームクリア処理
+           //<<< ボスの爆発 >>>
+            body.SetActive(false);
+            GameObject explosion = Instantiate(explosionPrefab, transform.position, Quaternion.identity); // 新しい回転を適用
+            explosion.SetActive(true);
+
+            // SEの再生
+            SEPlay(SEType.Explosion);
+
+            //<<< ゲームクリア処理 >>>
             GameClear();
             //                if (GameManager.gameState == GameState.playing) StartCoroutine(StartEnding());
             // とりあえずゲーム終了
@@ -401,7 +438,7 @@ public class BossController : MonoBehaviour
     /// </summary>
     void GameClear()
     {
-        Debug.Log("Game clear");
+        //Debug.Log("Game clear");
         GameManager.gameState = GameState.gameclear;
 
         //recoverTimeの時間をクリア
@@ -422,6 +459,32 @@ public class BossController : MonoBehaviour
         //        GameManager.gameState = GameState.ending;
         yield return new WaitForSeconds(10);
         SceneManager.LoadScene("Ending");
+    }
+
+    /// <summary>
+    /// SEの再生
+    /// </summary>
+    /// <param name="type"></param>
+    public void SEPlay(SEType type)
+    {
+        switch (type)
+        {
+            case SEType.Tackle:
+                audio.PlayOneShot(se_Tackle);
+                break;
+            case SEType.Damage:
+                audio.PlayOneShot(se_Damage);
+                break;
+            case SEType.Barrier:
+                audio.PlayOneShot(se_Barrier);
+                break;
+            case SEType.Explosion:
+                audio.PlayOneShot(se_Explosion);
+                break;
+            case SEType.Shot:
+                audio.PlayOneShot(se_Shot);
+                break;
+        }
     }
 
 }

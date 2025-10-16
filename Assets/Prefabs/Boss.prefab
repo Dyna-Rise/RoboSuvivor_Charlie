@@ -184,7 +184,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 2001011908470248764, guid: 1deab401563b029488f597b60636de1f, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
   Loop: 0
@@ -283,15 +283,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bossHP: 30
   body: {fileID: 5984871005895375351}
-  closeRange: 3
+  closeRange: 10
   barrierDeploymentDistance: 5
   attackInterval: 5
   bulletPrefab: {fileID: 6661650154168110023, guid: d6af67595b24ddb4dbea8a0f393d64c8, type: 3}
   bulletSpeed: 100
-  barrierDeployment: 0
   moveSpeed: 0.5
   gate: {fileID: 479167254591033205}
   barrierPrefab: {fileID: 2537263942911418905, guid: d74626caef558da4fb56793955c4637a, type: 3}
+  explosionPrefab: {fileID: 2839272602830932229, guid: 735fd581f0ab52e44a11009cbfce9dd3, type: 3}
+  se_Tackle: {fileID: 8300000, guid: 5758e7b2fb400534bbbe13109f2092b1, type: 3}
+  se_Damage: {fileID: 8300000, guid: 0d30ac30267e842419537598daf5f23d, type: 3}
+  se_Barrier: {fileID: 8300000, guid: 49239c753146a9249b207c80f8516c8c, type: 3}
+  se_Explosion: {fileID: 8300000, guid: 0bdbb689c62e18943b959eb8102051b0, type: 3}
+  se_Shot: {fileID: 8300000, guid: e9d67448e6d9ef749a7b4bdf5711c64b, type: 3}
 --- !u!1001 &4272159088411163765
 PrefabInstance:
   m_ObjectHideFlags: 0
