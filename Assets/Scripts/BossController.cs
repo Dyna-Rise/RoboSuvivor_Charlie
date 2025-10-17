@@ -24,6 +24,7 @@ public class BossController : MonoBehaviour
     public GameObject gate;                         // 弾を生成する位置
     public GameObject barrierPrefab;                // パリアープレハブ
     public GameObject explosionPrefab;              // エクスプロージョンプレハブ
+    public GameObject flamePrefab;                  // 炎のプレハブ
 
     //<<< ローカル変数 >>>
     GameObject player;                  // プレイヤー情報
@@ -220,17 +221,17 @@ public class BossController : MonoBehaviour
         // プレイヤーの位置を取得する
         Vector3 playerPosition = player.transform.position;
 
+        // SEの再生
+        SEPlay(SEType.Tackle);
+
         // プレイヤーに向かって設定されている近接位置まで移動する(タックルも攻撃なのでプレイヤーに接触する位置まで移動する）
-//        while (Vector3.Distance(transform.position, playerPosition) > closeRange)             // プレイヤーとの距離が近いと判断する距離(近接攻撃をする距離)
+        //        while (Vector3.Distance(transform.position, playerPosition) > closeRange)             // プレイヤーとの距離が近いと判断する距離(近接攻撃をする距離)
         while (Vector3.Distance(transform.position, playerPosition) > targetDistance)
         {
             transform.position = Vector3.Lerp(transform.position, playerPosition, Time.deltaTime);
             // 次のフレームまで待機
             yield return null;
         }
-
-        // SEの再生
-        SEPlay(SEType.Tackle);
 
         // 攻撃中フラグをクリアする
         isAttacking = false;           // 攻撃中かどうか
@@ -297,7 +298,7 @@ public class BossController : MonoBehaviour
             bulletRbody.AddForce((player.transform.position - gate.transform.position).normalized * bulletSpeed, ForceMode.Impulse);  // プレイヤーに向けて弾を撃ちだす
 
             // とりあえず弾を消去する
-            StartCoroutine(DestroyBullet(bullet));
+            //StartCoroutine(DestroyBullet(bullet));
 
             // バーストショットで次弾を打ち出す迄のウエイト
             yield return new WaitForSeconds(0.2f);
@@ -415,19 +416,9 @@ public class BossController : MonoBehaviour
         }
         else
         {
-           //<<< ボスの爆発 >>>
-            body.SetActive(false);
-            GameObject explosion = Instantiate(explosionPrefab, transform.position, Quaternion.identity); // 新しい回転を適用
-            explosion.SetActive(true);
-
-            // SEの再生
-            SEPlay(SEType.Explosion);
-
             //<<< ゲームクリア処理 >>>
             GameClear();
             //                if (GameManager.gameState == GameState.playing) StartCoroutine(StartEnding());
-            // とりあえずゲーム終了
-            Application.Quit();//ゲームプレイ終了
         }
 
     }
@@ -443,8 +434,11 @@ public class BossController : MonoBehaviour
 
         //recoverTimeの時間をクリア
         recoverTime = 0.0f;
+
         StartCoroutine(StartEnding());
 
+        // とりあえずゲーム終了
+        Application.Quit();//ゲームプレイ終了
     }
 
     /// <summary>
@@ -453,10 +447,40 @@ public class BossController : MonoBehaviour
     /// <returns></returns>
     IEnumerator StartEnding()
     {
+        //<<< ボスの爆発 >>>
+        // 連続する小さな爆発
+        for (int i = 0; i < 10;i++)
+        {
+            Vector3 expPosition = transform.position;
+            expPosition.x += Random.Range(-3, 4);
+            expPosition.y += Random.Range(0, 5) + transform.localScale.y / 2.0f;
+            expPosition.z += Random.Range(-3, 4);
+//            GameObject explosion = Instantiate(explosionPrefab, transform.position, Quaternion.identity);
+            GameObject explosion = Instantiate(explosionPrefab, expPosition, Quaternion.identity);
+            explosion.SetActive(true);
+
+            // SEの再生
+            SEPlay(SEType.Explosion);
+
+            yield return new WaitForSeconds(0.2f);
+        }
+
+        // ボス大爆発
+        GameObject explosion2 = Instantiate(explosionPrefab, transform.position, Quaternion.identity);
+        explosion2.transform.localScale *= 10.0f;
+        explosion2.SetActive(true);
+
+        // 炎が上がる
+        GameObject flame = Instantiate(flamePrefab, transform.position, Quaternion.identity);
+        flame.transform.localScale *= 8.0f;
+        flame.SetActive(true);
+
+        // ボスの姿が消える
+        body.SetActive(false);
+
         //ゲームエンド
         //        animator.SetTrigger("Dead");
         rbody.linearVelocity = Vector2.zero;
-        //        GameManager.gameState = GameState.ending;
         yield return new WaitForSeconds(10);
         SceneManager.LoadScene("Ending");
     }
