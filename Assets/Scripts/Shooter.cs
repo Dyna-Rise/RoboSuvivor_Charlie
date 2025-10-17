@@ -66,8 +66,9 @@ public class Shooter : MonoBehaviour
         if (player == null || GameManager.shotRemainingNum <= 0 || isAttack)
             return;
 
-        //プレイヤーの位置にBulletを作成、gateの角度に生成
-        GameObject obj = Instantiate(bulletPrefab, gate.transform.position, gate.transform.rotation * Quaternion.Euler(90, 0, 0));
+        //プレイヤーの位置にBulletを作成、gateの角度に生成 → camの角度に生成に変更、気持ち弾道の正面から見えるようになる
+        GameObject obj = Instantiate(bulletPrefab, gate.transform.position, cam.transform.rotation * Quaternion.Euler(90, 0, 0));
+        
 
 
         //生成したBulletのRigidbodyを取得

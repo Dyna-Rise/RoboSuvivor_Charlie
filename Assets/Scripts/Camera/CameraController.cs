@@ -16,7 +16,7 @@ public class CaneraRotation : MonoBehaviour
 
     //カメラ回転用変数
     float minVerticalAngle = -15.0f; //カメラ角度上の限界値
-    float maxVerticalAngle = 15.0f; //カメラ角度下の限界値
+    float maxVerticalAngle = 20.0f; //カメラ角度下の限界値
 
     //プレイ中の角度
     public float verticalRotation;
