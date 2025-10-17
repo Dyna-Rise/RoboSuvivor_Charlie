@@ -76,6 +76,7 @@ public class PlayerController : MonoBehaviour
         if (GameManager.gameState != GameState.playing && GameManager.gameState != GameState.gameclear)
             return;
 
+        if (GameManager.playerHP <= 0) return;
 
         // ダメージ中の点滅処理
         if (isDamage)
@@ -129,6 +130,8 @@ public class PlayerController : MonoBehaviour
         // 衝突したオブジェクトのタグが"Enemy" または "EnemyBullet" で、現在無敵時間中（isDamage = true）でない場合
         if (!isDamage)
         {
+            if(GameManager.playerHP <= 0) return;
+
             if (hit.gameObject.CompareTag("Enemy") || hit.gameObject.CompareTag("EnemyBullet") || hit.gameObject.CompareTag("Barrier"))
             {
                 //SetDamageState(true);
@@ -153,7 +156,7 @@ public class PlayerController : MonoBehaviour
     }
 
     IEnumerator Dead()
-    {
+    {        
         audioSource.PlayOneShot(se_Explosion);
         yield return new WaitForSeconds(3);
         GameManager.gameState = GameState.gameover;

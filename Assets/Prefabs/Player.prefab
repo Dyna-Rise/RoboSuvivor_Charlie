@@ -344,7 +344,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   body: {fileID: 9008698450713019217}
-  moveSpeed: 5
+  moveSpeed: 8
   dashSpeed: 10
   gravity: 20
   jumpForce: 8
@@ -417,7 +417,7 @@ MonoBehaviour:
   dashSpeedMultiplier: 2
   maxDashStamina: 100
   currentDashStamina: 0
-  dashStaminaConsumptionRate: 30
+  dashStaminaConsumptionRate: 15
   dashStaminaRecoveryRate: 20
   dashStaminaRecoveryDelay: 1
   doublePressTimeThreshold: 0.2

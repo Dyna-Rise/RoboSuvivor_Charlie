@@ -63,6 +63,8 @@ public class GameManager : MonoBehaviour
                 SoundManager.instance.PlayBgm(BGMType.Ending);
                 break;
             case "Title":
+                Cursor.lockState = CursorLockMode.None; //画面中心にカーソルのロック解除
+                Cursor.visible = true; //カーソルを表示
                 SoundManager.instance.PlayBgm(BGMType.Title);
                 break;
         }

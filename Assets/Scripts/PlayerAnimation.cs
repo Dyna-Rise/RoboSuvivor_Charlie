@@ -6,6 +6,9 @@ public class PlayerAnimation : MonoBehaviour
     public enum GameState { playing, gameover }
     public static GameState currentGameState = GameState.playing;
 
+    CharacterController charactercnt;
+
+    bool isGameoverAction;
 
     void Start()
     {
@@ -14,24 +17,31 @@ public class PlayerAnimation : MonoBehaviour
         {
             animator.SetBool("walk", false);
         }
+
+        charactercnt = GetComponent<CharacterController>();
     }
 
     void Update()
     {
         // ゲームオーバー
-            if (currentGameState == GameState.gameover)
+        if (GameManager.playerHP <= 0)
         {
+            if (isGameoverAction) return;
 
-                animator.SetTrigger("die");
+            animator.SetTrigger("die");
+            isGameoverAction = true;
             return; 
         }
 
-        // スペースキーを押した場合ジャンプ
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (charactercnt.isGrounded)
         {
-            if (animator != null)
+            // スペースキーを押した場合ジャンプ
+            if (Input.GetKeyDown(KeyCode.Space))
             {
-                animator.SetTrigger("jump");
+                if (animator != null)
+                {
+                    animator.SetTrigger("jump");
+                }
             }
         }
 
