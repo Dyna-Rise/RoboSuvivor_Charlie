@@ -310,9 +310,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60164141bb0aa4f48836b69e9f37449d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  detectionRange: 30
-  attackRange: 20
-  stopRange: 10
+  detectionRange: 80
+  attackRange: 30
+  stopRange: 15
   shootSpeed: 100
   enemyHP: 5
   enemySpeed: 3

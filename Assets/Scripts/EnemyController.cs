@@ -115,40 +115,48 @@ public class EnemyController : MonoBehaviour
                 transform.LookAt(player.transform.position); // これだと瞬時に回転
                 //LookAtPlayer(); // スムーズな回転
             }
-            if (navMeshAgent != null) // navMeshAgentがnullでないことを確認
-            {
-                navMeshAgent.isStopped = false;
-                navMeshAgent.SetDestination(player.transform.position);
-                navMeshAgent.speed = enemySpeed;
-            }
+           
 
             //射程範囲に入ったら攻撃しつつゆっくり近づいいてくる
             if (distance <= attackRange)
             {
-                if (navMeshAgent != null) // navMeshAgentがnullでないことを確認
-                {
-                    navMeshAgent.speed = enemySpeed * 0.5f; //半分の速度にする
-                }
-
                 if (isAttack) //攻撃中なら何もしない
                 {
                     return;
                 }
-
-                if (Time.time >= timer)
+                
+                if (Time.time >= timer) //攻撃間隔
                 {
                     StartCoroutine(Attack());
 
                     //timer = Time.time + 1f / fireInterval; // 次の発射可能時間を更新
                 }
-                if (distance <= stopRange)
+                if (distance <= stopRange) //接近限界だったら止まる
                 {
                     if (navMeshAgent != null) // navMeshAgentがnullでないことを確認
                     {
                         navMeshAgent.isStopped = true;
                     }
-
                 }
+                else //攻撃範囲以内で接近限界より距離があるなら動く
+                {
+                    if (navMeshAgent != null) // navMeshAgentがnullでないことを確認
+                    {
+                        navMeshAgent.isStopped = false;
+                        navMeshAgent.SetDestination(player.transform.position);
+                        navMeshAgent.speed = enemySpeed * 0.5f; //半分の速度にする
+                    }
+                }
+            }
+            else　//索敵範囲以内で攻撃範囲より距離があるなら動く
+            {
+                if (navMeshAgent != null) // navMeshAgentがnullでないことを確認
+                {
+                    navMeshAgent.isStopped = false;
+                    navMeshAgent.SetDestination(player.transform.position);
+                    navMeshAgent.speed = enemySpeed;
+                }
+
             }
         }
         else // 索敵範囲外に出たら停止
