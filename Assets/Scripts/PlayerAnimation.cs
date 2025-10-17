@@ -21,10 +21,8 @@ public class PlayerAnimation : MonoBehaviour
         // ゲームオーバー
             if (currentGameState == GameState.gameover)
         {
-            if (animator != null)
-            {
+
                 animator.SetTrigger("die");
-            }
             return; 
         }
 

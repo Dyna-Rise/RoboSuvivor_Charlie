@@ -9,8 +9,8 @@ public class PlayerController : MonoBehaviour
     public GameObject body;
 
     // 移動設定
-    public float moveSpeed = 5.0f;
-    public float dashSpeed = 10.0f;
+    public float moveSpeed = 40.0f;
+    public float dashSpeed = 80.0f;
     public float gravity = 20.0f;
     public float jumpForce = 8.0f;
 
