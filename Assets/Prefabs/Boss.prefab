@@ -292,6 +292,7 @@ MonoBehaviour:
   gate: {fileID: 479167254591033205}
   barrierPrefab: {fileID: 2537263942911418905, guid: d74626caef558da4fb56793955c4637a, type: 3}
   explosionPrefab: {fileID: 2839272602830932229, guid: 735fd581f0ab52e44a11009cbfce9dd3, type: 3}
+  flamePrefab: {fileID: 11221310824418764, guid: aa39998c8818a584ba24965d950e51b1, type: 3}
   se_Tackle: {fileID: 8300000, guid: 5758e7b2fb400534bbbe13109f2092b1, type: 3}
   se_Damage: {fileID: 8300000, guid: 0d30ac30267e842419537598daf5f23d, type: 3}
   se_Barrier: {fileID: 8300000, guid: 49239c753146a9249b207c80f8516c8c, type: 3}
