@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
+//コードレビュー
+
 /// <summary>
 /// Bossコントロール・クラス
 /// </summary>
