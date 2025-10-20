@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
+//コードレビュー
 public class PlayerController : MonoBehaviour
 {
     // 公開変数 (インスペクターから設定可能)

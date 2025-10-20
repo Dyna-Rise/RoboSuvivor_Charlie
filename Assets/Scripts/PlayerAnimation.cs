@@ -1,5 +1,6 @@
 using UnityEngine;
 
+//コードレビュー
 public class PlayerAnimation : MonoBehaviour
 {
     public Animator animator;
