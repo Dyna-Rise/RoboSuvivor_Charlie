@@ -2,6 +2,7 @@ using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 
+//コードレビュー
 public class Shooter : MonoBehaviour
 {
     public GameObject bulletPrefab; //バレットプレハブ

@@ -1,5 +1,6 @@
 using UnityEngine;
 
+//コードレビュー
 public class CaneraRotation : MonoBehaviour
 {
     Vector3 diff; //ターゲット距離の差
