@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.EventSystems;
 
+//コードレビュー
 public class EnemyController : MonoBehaviour
 {
     GameObject player;      // プレイヤーをInspectorから設定
